@@ -1,0 +1,126 @@
+import os
+from pathlib import Path
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+from openai import OpenAI
+from schema import ChatRequest, ChatResponse
+
+BASE_DIR = Path(__file__).resolve().parent
+load_dotenv(BASE_DIR / ".env")
+
+app = FastAPI(title="AI Chatbot Backend")
+client = None
+
+
+def initialize_client():
+    global client
+    load_dotenv(BASE_DIR / ".env")
+    api_key = os.getenv("GROQ_API_KEY") or os.getenv("OPENAI_API_KEY")
+
+    if not api_key:
+        client = None
+        return None
+
+    if api_key.startswith("gsk_"):
+        client = OpenAI(api_key=api_key, base_url="https://api.groq.com/openai/v1")
+    else:
+        client = OpenAI(api_key=api_key)
+
+    return client
+
+
+@app.on_event("startup")
+async def startup_event():
+    print("🚀 AI Patient Backend is starting...")
+    print("📍 Server will be available at http://127.0.0.1:8000")
+    initialize_client()
+
+    if not client:
+        print("⚠️ OPENAI_API_KEY is not set. Add it to .env before using chat.")
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+initialize_client()
+
+SYSTEM_PROMPT = {
+    "role": "system",
+    "content": (
+        "You are an AI Medical Patient Simulator for medical students. Your role is to act ONLY as a patient. "
+        "Do NOT act as an AI or a doctor. "
+        
+        "CRITICAL SETUP:\n"
+        "1. At the very start of the session, internally select ONE random medical condition/disease from a vast pool "
+        "(e.g., Diabetes, Typhoid, Malaria, Appendicitis, Hypertension, Asthma, GERD, Migraine, etc.). "
+        "Do NOT reveal the name of this disease to the user under any circumstances.\n"
+        "2. Keep track of the symptoms associated with your chosen disease.\n"
+        
+        "CONVERSATION RULES:\n"
+        "1. When the student greets you, start by stating only your CHIEF COMPLAINT (the main symptom) in a simple, non-medical way. "
+        "2. Do NOT give away all symptoms at once. Reveal other symptoms slowly, ONLY when the user asks specific history-taking questions.\n"
+        "3. Language: Mix simple English and Roman Urdu naturally (e.g., 'Mujhe pichle 3 din se bukhar hai aur body pain ho raha hai'). Match the user's language comfort.\n"
+        "4. If the student asks you direct medical definitions or asks you to diagnose yourself, reply as a layman: 'Mujhe nahi pata doctor saab, aap check karke batayein.'\n"
+        
+        "DIAGNOSIS & MEDICINE PHASE:\n"
+        "1. The student must explicitly type their final diagnosis (e.g., 'I think you have Typhoid') AND recommend the correct generic medicine/management.\n"
+        "2. Once they do both, break character and give them a structured feedback evaluation:\n"
+        "   - Tell them if their diagnosis was Correct/Incorrect.\n"
+        "   - Tell them what the actual disease was.\n"
+        "   - Review if their recommended medicine/treatment plan was safe and accurate."
+    )
+}
+
+@app.post("/chat", response_model=ChatResponse)
+async def chat_with_llm(request: ChatRequest):
+    try:
+        initialize_client()
+        if client is None:
+            raise HTTPException(status_code=500, detail="OPENAI_API_KEY missing in .env file.")
+        
+        messages = [SYSTEM_PROMPT]
+        
+        # 2. Purani chat history add karein (Context Window maintaining memory)
+        for msg in request.chat_history:
+            messages.append({"role": msg["role"], "content": msg["content"]})
+            
+        # 3. User ka naya message add karein
+        messages.append({"role": "user", "content": request.message})
+        
+        # 4. OpenAI API Call
+        api_key = os.getenv("GROQ_API_KEY") or os.getenv("OPENAI_API_KEY") or ""
+        model_name = "llama-3.3-70b-versatile" if api_key.startswith("gsk_") else "gpt-4o-mini"
+
+        completion = client.chat.completions.create(
+            model=model_name,
+            messages=messages,
+            temperature=0.2,
+            max_tokens=150,
+            top_p=0.2
+        )
+        
+        # 5. Response nikal kar wapis bhejein
+        bot_reply = completion.choices[0].message.content
+        return ChatResponse(response=bot_reply)
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Server run karne ke liye endpoint checker
+@app.get("/")
+def read_root():
+    return {"status": "Backend is running successfully!"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    print("▶️ Starting FastAPI server...")
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

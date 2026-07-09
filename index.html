@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Patient Simulator - Professional Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-sidebar: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --accent-teal: #0d9488;
+            --border-color: #e2e8f0;
+            --bubble-user: #e0e7ff;
+            --bubble-patient: #ffffff;
+            --vitals-bg: #f1f5f9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Dashboard Layout */
+        .dashboard-container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+        }
+
+        /* Sidebar - Patient Vitals & Info */
+        .sidebar {
+            width: 340px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .patient-profile {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .avatar-container {
+            position: relative;
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 12px;
+        }
+
+        .patient-avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #cbd5e1;
+        }
+
+        .status-dot {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            width: 14px;
+            height: 14px;
+            background-color: #22c55e;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .patient-name {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .case-id {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+
+        /* Vitals Section */
+        .vitals-section {
+            margin: 24px 0;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .section-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .vital-card {
+            display: flex;
+            align-items: center;
+            background-color: var(--vitals-bg);
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            transition: transform 0.2s;
+        }
+
+        .vital-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .vital-icon {
+            font-size: 1.25rem;
+            margin-right: 14px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .icon-heart { color: #ef4444; }
+        .icon-bp { color: #3b82f6; }
+        .icon-temp { color: #f59e0b; }
+
+        .vital-info .vital-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .vital-info .vital-value {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .case-summary {
+            background-color: #f8fafc;
+            border-left: 4px solid var(--primary-color);
+            padding: 12px;
+            border-radius: 4px 12px 12px 4px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            color: #334155;
+        }
+
+        /* Control Buttons */
+        .sidebar-footer {
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-secondary {
+            width: 100%;
+            background: none;
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 500;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-secondary:hover {
+            background-color: #f1f5f9;
+            color: var(--text-main);
+        }
+
+        .btn-secondary.reset-btn {
+            margin-top: 8px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 24px 16px;
+            background: #ffffff;
+            border: 1px dashed var(--border-color);
+            border-radius: 14px;
+        }
+
+        .typing-indicator {
+            display: inline-flex;
+            gap: 6px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            width: fit-content;
+        }
+
+        .typing-indicator span {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            animation: pulse 1s infinite ease-in-out;
+        }
+
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes pulse {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Main Chat Area */
+        .chat-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-primary);
+            height: 100vh;
+        }
+
+        /* Chat Header */
+        .chat-header {
+            height: 75px;
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+        }
+
+        .header-title h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .header-title p {
+            font-size: 0.85rem;
+            color: var(--accent-teal);
+            font-weight: 500;
+        }
+
+        .badge {
+            background-color: #ccfbf1;
+            color: #115e59;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Chat Messages Container */
+        .messages-container {
+            flex-grow: 1;
+            padding: 32px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .message-row {
+            display: flex;
+            width: 100%;
+        }
+
+        .message-row.patient-msg {
+            justify-content: flex-start;
+        }
+
+        .message-row.user-msg {
+            justify-content: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 65%;
+            padding: 16px 20px;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        .patient-msg .message-bubble {
+            background-color: var(--bubble-patient);
+            color: var(--text-main);
+            border-bottom-left-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        .user-msg .message-bubble {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-meta {
+            font-size: 0.75rem;
+            margin-top: 6px;
+            display: block;
+        }
+
+        .patient-msg .message-meta { color: var(--text-muted); }
+        .user-msg .message-meta { color: #c7d2fe; text-align: right; }
+
+        /* Input Area Footer */
+        .chat-footer {
+            padding: 24px 32px;
+            background-color: #ffffff;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .input-wrapper {
+            display: flex;
+            background-color: #f1f5f9;
+            border-radius: 14px;
+            padding: 6px 8px;
+            align-items: center;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .input-wrapper:focus-within {
+            background-color: #ffffff;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        .chat-input {
+            flex-grow: 1;
+            border: none;
+            background: transparent;
+            padding: 12px;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .chat-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .btn-send {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .btn-send:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Custom Scrollbar for premium feel */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body>  
+
+    <div class="dashboard-container">
+        
+        <aside class="sidebar">
+            <div class="patient-profile">
+                <div class="avatar-container">
+                    <img src="Ionstine.jpg" alt="Patient Portrait" class="patient-avatar">
+                    <div class="status-dot"></div>
+                </div>
+                <h3 class="patient-name">Albert_Einstein</h3>
+                <p class="case-id">Case File: #AIP-4092</p>
+            </div>
+
+            <div class="vitals-section">
+                <p class="section-title">Live Vitals</p>
+                
+                <div class="vital-card">
+                    <i class="fa-solid fa-heartbeat vital-icon icon-heart"></i>
+                    <div class="vital-info">
+                        <p class="vital-label">Heart Rate</p>
+                        <p class="vital-value">84 BPM</p>
+                    </div>
+                </div>
+
+                <div class="vital-card">
+                    <i class="fa-solid fa-gauge-high vital-icon icon-bp"></i>
+                    <div class="vital-info">
+                        <p class="vital-label">Blood Pressure</p>
+                        <p class="vital-value">132/88 mmHg</p>
+                    </div>
+                </div>
+
+                <div class="vital-card">
+                    <i class="fa-solid fa-thermometer vital-icon icon-temp"></i>
+                    <div class="vital-info">
+                        <p class="vital-label">Temperature</p>
+                        <p class="vital-value">99.1 °F</p>
+                    </div>
+                </div>
+
+                <p class="section-title" style="margin-top: 24px;">Chief Complaint</p>
+                <div class="case-summary">
+                    Patient presents with sharp, intermittent chest pain radiation to the left shoulder, accompanied by mild dyspnea starting 2 hours ago.
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <button class="btn-secondary reset-btn" id="resetBtn" type="button">
+                    <i class="fa-solid fa-arrow-rotate-left"></i> Reset Simulation
+                </button>
+            </div>
+        </aside>
+
+        <main class="chat-area">
+            <header class="chat-header">
+                <div class="header-title">
+                    <h2>Clinical Case Training Session</h2>
+                    <p><i class="fa-solid fa-circle-check"></i> Simulator Active & Logging</p>
+                </div>
+                <span class="badge">Objective Structured Exam</span>
+            </header>
+
+            <div class="messages-container" id="messagesContainer">
+                <div class="message-row patient-msg">
+                    <div class="message-bubble">
+                        Doctor, mujhe pichle do ghante se seene mein bohot ajeeb sa, tez dard ho raha hai. Lag raha hai jaise koi bohot bhaari wazan rakh diya ho... Yeh dard ab mere khabey (left) kandhe ki taraf ja raha hai. Mujhe thodi saans lene mein bhi takleef ho rahi hai.
+                        <span class="message-meta">Patient • 10:42 AM</span>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="chat-footer">
+                <div class="input-wrapper">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="Ask a clinical question or order a diagnostic test...">
+                    <button class="btn-send" id="sendBtn" title="Send Message" type="button">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </footer>
+        </main>
+
+    </div>
+
+    <script>
+        // Connect the frontend chat UI to the FastAPI backend.
+        // Each message is sent to /chat with the full conversation history so the model remembers earlier turns.
+        const API_URL = 'http://127.0.0.1:8000/chat';
+        const messagesContainer = document.getElementById('messagesContainer');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        let chatHistory = [];
+
+        function addMessage(role, content, meta = '') {
+            const row = document.createElement('div');
+            row.className = `message-row ${role === 'user' ? 'user-msg' : 'patient-msg'}`;
+
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.innerHTML = `${content}<span class="message-meta">${meta}</span>`;
+            row.appendChild(bubble);
+            messagesContainer.appendChild(row);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function setLoading(isLoading) {
+            chatInput.disabled = isLoading;
+            sendBtn.disabled = isLoading;
+            sendBtn.style.opacity = isLoading ? '0.7' : '1';
+
+            if (isLoading) {
+                const loadingRow = document.createElement('div');
+                loadingRow.className = 'message-row patient-msg';
+                loadingRow.innerHTML = `
+                    <div class="typing-indicator" id="typingIndicator">
+                        <span></span><span></span><span></span>
+                    </div>`;
+                messagesContainer.appendChild(loadingRow);
+            } else {
+                const typing = document.getElementById('typingIndicator');
+                if (typing) typing.parentElement.remove();
+            }
+        }
+
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            addMessage('user', message, 'You • just now');
+            chatInput.value = '';
+            setLoading(true);
+
+            try {
+                const payload = {
+                    message: message,
+                    chat_history: chatHistory
+                };
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Backend returned an error.');
+                }
+
+                const reply = data.response || 'No response received.';
+                addMessage('assistant', reply, 'Patient • just now');
+
+                // Keep the conversation history so the next prompt still has context.
+                chatHistory.push({ role: 'user', content: message });
+                chatHistory.push({ role: 'assistant', content: reply });
+            } catch (error) {
+                addMessage('assistant', `Sorry, I could not reach the backend. ${error.message}`, 'Patient • error');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        function resetChat() {
+            chatHistory = [];
+            messagesContainer.innerHTML = '';
+            addMessage('assistant', 'The simulation has been reset. Please start a new clinical conversation.', 'Patient • reset');
+            chatInput.value = '';
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        resetBtn.addEventListener('click', resetChat);
+        chatInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+
+        resetChat();
+    </script>
+</body>
+</html>
