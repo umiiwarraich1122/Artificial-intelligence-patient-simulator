@@ -2,6 +2,7 @@ import os
 import logging
 import re
 from pathlib import Path
+from fastapi.responses import StreamingResponse
 from typing import Optional
 from uuid import uuid4
 from fastapi import FastAPI, HTTPException, Header, Depends, Request, status
@@ -270,15 +271,15 @@ SYSTEM_PROMPT = {
         "- Only reveal the disease during the evaluation phase."
     )
 }
-@app.post("/chat", response_model=ChatResponse)
+@app.post("/chat")
 async def chat_with_llm(
-    
     request: ChatRequest,
     access_token: str = Depends(get_bearer_token),
 ):
     try:
         validate_user_input(request.message)
         log_if_suspicious(request.message)
+
         initialize_client()
 
         if client is None:
@@ -287,12 +288,13 @@ async def chat_with_llm(
                 detail="OPENAI_API_KEY missing in .env file.",
             )
 
+        # Create Supabase client
         supabase_client = create_supabase_client_for_user(access_token)
 
-        user_response = supabase_client.auth.get_user(access_token)
-
+        # Conversation ID
         conversation_id = request.conversation_id or str(uuid4())
 
+        # Load previous conversation
         conversation_history = []
 
         result = (
@@ -303,7 +305,7 @@ async def chat_with_llm(
             .execute()
         )
 
-        for msg in result.data:
+        for msg in result.data or []:
             role = "assistant" if msg["sender"] == "ai" else "user"
 
             conversation_history.append(
@@ -313,6 +315,7 @@ async def chat_with_llm(
                 }
             )
 
+        # Add current user message
         conversation_history.append(
             {
                 "role": "user",
@@ -320,56 +323,53 @@ async def chat_with_llm(
             }
         )
 
-        # OpenAI/Groq call...   
+        # Select model
         api_key = os.getenv("GROQ_API_KEY") or os.getenv("OPENAI_API_KEY") or ""
-        model_name = "llama-3.3-70b-versatile" if api_key.startswith("gsk_") else "gpt-4o-mini"
 
-        completion = client.chat.completions.create(
-            model=model_name,
-            messages=[SYSTEM_PROMPT] + conversation_history,
-            temperature=0.2,
-            max_tokens=150,
-            top_p=0.2
+        model_name = (
+            "llama-3.3-70b-versatile"
+            if api_key.startswith("gsk_")
+            else "gpt-4o-mini"
         )
 
-        choices = getattr(completion, "choices", None)
-        if choices is None:
-            raise HTTPException(status_code=500, detail=f"Chat completion returned no choices: {completion}")
+        async def generate():
+            full_reply = ""
 
-        try:
-            if len(choices) == 0:
-                raise HTTPException(status_code=500, detail=f"Chat completion returned an empty choices list: {completion}")
-        except TypeError:
-            pass
+            stream = client.chat.completions.create(
+                model=model_name,
+                messages=[SYSTEM_PROMPT] + conversation_history,
+                temperature=0.2,
+                max_tokens=150,
+                top_p=0.2,
+                stream=True,
+            )
 
-        try:
-            choice = choices[0]
-        except Exception as exc:
-            raise HTTPException(status_code=500, detail=f"Chat completion choice access failed: {exc}")
+            for chunk in stream:
+                text = chunk.choices[0].delta.content or ""
 
-        message_obj = getattr(choice, "message", None)
-        bot_reply = None
-        if message_obj is not None:
-            bot_reply = getattr(message_obj, "content", None)
-        if bot_reply is None:
-            bot_reply = getattr(choice, "text", None)
+                if text:
+                    full_reply += text
+                    yield text
 
-        if not bot_reply:
-            bot_reply = validate_model_output(bot_reply)
-            raise HTTPException(status_code=500, detail=f"Unexpected chat completion format: {completion}")
+            # Validate final response
+            full_reply = validate_model_output(full_reply)
 
-        return ChatResponse(response=bot_reply, conversation_id=conversation_id)
+        return StreamingResponse(
+            generate(),
+            media_type="text/plain",
+        )
 
     except HTTPException:
         raise
+
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+        raise HTTPException(
+            status_code=500,
+            detail=str(exc),
+        )
 
 
-
-
-
-@app.post("/chat/save", response_model=SaveMessageResponse)
+@app.post("/chat/save")
 async def save_message(payload: SaveMessageRequest, access_token: str = Depends(get_bearer_token)):
     supabase_client, user_id = get_current_supabase_user(access_token)
 
@@ -490,7 +490,7 @@ async def auth_callback(request: Request):
 
 # Server run karne ke liye endpoint checker
 
-app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
+app.mount("/static", StaticFiles(directory=BASE_DIR ), name="static")
 @app.get("/status")
 def read_root():
     return {"status": "Backend is running successfully!"}

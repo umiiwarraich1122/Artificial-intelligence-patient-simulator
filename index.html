@@ -7,540 +7,537 @@
     <title>AI Patient Simulator - Professional Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-   
+
 
 </head>
 <style>
-
-    
-        :root {
-            --bg-primary: #f8fafc;
-            --bg-sidebar: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --primary-color: #4f46e5;
-            --primary-hover: #4338ca;
-            --accent-teal: #0d9488;
-            --border-color: #e2e8f0;
-            --bubble-user: #e0e7ff;
-            --bubble-patient: #ffffff;
-            --vitals-bg: #f1f5f9;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-primary);
-            color: var(--text-main);
-            height: 100vh;
-            display: flex;
-            overflow: hidden;
-        }
-
-        /* Dashboard Layout */
-        .dashboard-container {
-            display: flex;
-            width: 100%;
-            height: 100vh;
-        }
-
-        /* Sidebar - Patient Vitals & Info */
-        .sidebar {
-            width: 340px;
-            background-color: var(--bg-sidebar);
-            border-right: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            padding: 24px;
-            justify-content: space-between;
-            z-index: 10;
-        }
-
-        .patient-profile {
-            text-align: center;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .avatar-container {
-            position: relative;
-            width: 90px;
-            height: 90px;
-            margin: 0 auto 12px;
-        }
-
-        .patient-avatar {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid #cbd5e1;
-        }
-
-        .status-dot {
-            position: absolute;
-            bottom: 4px;
-            right: 4px;
-            width: 14px;
-            height: 14px;
-            background-color: #22c55e;
-            border-radius: 50%;
-            border: 2px solid white;
-        }
-
-        .patient-name {
-            font-size: 1.15rem;
-            font-weight: 600;
-            color: var(--text-main);
-        }
-
-        .case-id {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-top: 2px;
-        }
-
-        /* Vitals Section */
-        .vitals-section {
-            margin: 24px 0;
-            flex-grow: 1;
-            overflow-y: auto;
-        }
-
-        .section-title {
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: var(--text-muted);
-            font-weight: 700;
-            margin-bottom: 12px;
-        }
-
-        .vital-card {
-            display: flex;
-            align-items: center;
-            background-color: var(--vitals-bg);
-            padding: 12px 16px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            transition: transform 0.2s;
-        }
-
-        .vital-card:hover {
-            transform: translateY(-2px);
-        }
-
-        .vital-icon {
-            font-size: 1.25rem;
-            margin-right: 14px;
-            width: 24px;
-            text-align: center;
-        }
-
-        .icon-heart {
-            color: #ef4444;
-        }
-
-        .icon-bp {
-            color: #3b82f6;
-        }
-
-        .icon-temp {
-            color: #f59e0b;
-        }
-
-        .vital-info .vital-label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
-
-        .vital-info .vital-value {
-            font-size: 1rem;
-            font-weight: 600;
-        }
-
-        .case-summary {
-            background-color: #f8fafc;
-            border-left: 4px solid var(--primary-color);
-            padding: 12px;
-            border-radius: 4px 12px 12px 4px;
-            font-size: 0.85rem;
-            line-height: 1.4;
-            color: #334155;
-        }
-
-        /* Control Buttons */
-        .sidebar-footer {
-            padding-top: 16px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .btn-secondary {
-            width: 100%;
-            background: none;
-            border: 1px solid var(--border-color);
-            padding: 10px;
-            border-radius: 8px;
-            font-weight: 500;
-            color: #475569;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-secondary:hover {
-            background-color: #f1f5f9;
-            color: var(--text-main);
-        }
-
-        .btn-secondary.reset-btn {
-            margin-top: 8px;
-        }
-
-        .history-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 12px;
-            max-height: 300px;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-
-        .history-item {
-            background: #f8fafc;
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            padding: 14px 16px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            color: #334155;
-            text-align: left;
-            transition: background-color 0.2s, transform 0.2s;
-        }
-
-        .history-item:hover {
-            background: #eef2ff;
-            transform: translateX(2px);
-        }
-
-        .history-item strong {
-            display: block;
-            margin-bottom: 4px;
-            color: var(--text-main);
-        }
-
-        .history-item span {
-            color: var(--text-muted);
-            font-size: 0.8rem;
-        }
-
-        .history-empty {
-            margin-top: 12px;
-            padding: 14px;
-            background: #f8fafc;
-            border: 1px dashed var(--border-color);
-            border-radius: 12px;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            line-height: 1.5;
-        }
-
-        .history-item:hover {
-            background: #eef2ff;
-        }
-
-        .empty-state {
-            text-align: center;
-            color: var(--text-muted);
-            padding: 24px 16px;
-            background: #ffffff;
-            border: 1px dashed var(--border-color);
-            border-radius: 14px;
-        }
-
-        .typing-indicator {
-            display: inline-flex;
-            gap: 6px;
-            padding: 10px 14px;
-            border-radius: 999px;
-            background: #ffffff;
-            border: 1px solid var(--border-color);
-            color: var(--text-muted);
-            width: fit-content;
-        }
-
-        .typing-indicator span {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: var(--primary-color);
-            animation: pulse 1s infinite ease-in-out;
-        }
-
-        .typing-indicator span:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .typing-indicator span:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        @keyframes pulse {
-
-            0%,
-            80%,
-            100% {
-                transform: scale(0.8);
-                opacity: 0.5;
-            }
-
-            40% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        /* Main Chat Area */
-        .chat-area {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            background-color: var(--bg-primary);
-            height: 100vh;
-        }
-
-        /* Chat Header */
-        .chat-header {
-            height: 75px;
-            background-color: #ffffff;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 32px;
-        }
-
-        .header-title h2 {
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
-
-        .header-title p {
-            font-size: 0.85rem;
-            color: var(--accent-teal);
-            font-weight: 500;
-        }
-
-        .badge {
-            background-color: #ccfbf1;
-            color: #115e59;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        /* Chat Messages Container */
-        .messages-container {
-            flex-grow: 1;
-            padding: 32px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .message-row {
-            display: flex;
-            width: 100%;
-        }
-
-        .message-row.patient-msg {
-            justify-content: flex-start;
-        }
-
-        .message-row.user-msg {
-            justify-content: flex-end;
-        }
-
-        .message-bubble {
-            max-width: 65%;
-            padding: 16px 20px;
-            border-radius: 16px;
-            font-size: 0.95rem;
-            line-height: 1.5;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-            position: relative;
-        }
-
-        .patient-msg .message-bubble {
-            background-color: var(--bubble-patient);
-            color: var(--text-main);
-            border-bottom-left-radius: 4px;
-            border: 1px solid var(--border-color);
-        }
-
-        .user-msg .message-bubble {
-            background-color: var(--primary-color);
-            color: #ffffff;
-            border-bottom-right-radius: 4px;
-        }
-
-        .message-meta {
-            font-size: 0.75rem;
-            margin-top: 6px;
-            display: block;
-        }
-
-        .patient-msg .message-meta {
-            color: var(--text-muted);
-        }
-
-        .user-msg .message-meta {
-            color: #c7d2fe;
-            text-align: right;
-        }
-
-        /* Input Area Footer */
-        .chat-footer {
-            padding: 24px 32px;
-            background-color: #ffffff;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .input-wrapper {
-            display: flex;
-            background-color: #f1f5f9;
-            border-radius: 14px;
-            padding: 6px 8px;
-            align-items: center;
-            border: 2px solid transparent;
-            transition: all 0.2s;
-        }
-
-        .input-wrapper:focus-within {
-            background-color: #ffffff;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
-        }
-
-        .chat-input {
-            flex-grow: 1;
-            border: none;
-            background: transparent;
-            padding: 12px;
-            font-size: 0.95rem;
-            color: var(--text-main);
-            outline: none;
-        }
-
-        .chat-input::placeholder {
-            color: #94a3b8;
-        }
-
-        .btn-send {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            width: 44px;
-            height: 44px;
-            border-radius: 10px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.2s;
-        }
-
-        .btn-send:hover {
-            background-color: var(--primary-hover);
-        }
-
-        /* Custom Scrollbar for premium feel */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        .history-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            margin-bottom: 8px;
-            border-radius: 8px;
-            background: #f8f8f8;
-        }
-
-        .history-content {
-            flex: 1;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .delete-btn {
-            border: none;
-            background: transparent;
-            color: #ff4d4d;
-            font-size: 20px;
-            cursor: pointer;
-            padding: 5px 10px;
-        }
-
-        .delete-btn:hover {
-            color: #d60000;
-        }
-
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #28a745;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            opacity: 0;
-            transform: translateY(-20px);
-            transition: all .3s ease;
-            z-index: 9999;
-        }
-
-        .toast.show {
+    :root {
+        --bg-primary: #f8fafc;
+        --bg-sidebar: #ffffff;
+        --text-main: #0f172a;
+        --text-muted: #64748b;
+        --primary-color: #4f46e5;
+        --primary-hover: #4338ca;
+        --accent-teal: #0d9488;
+        --border-color: #e2e8f0;
+        --bubble-user: #e0e7ff;
+        --bubble-patient: #ffffff;
+        --vitals-bg: #f1f5f9;
+    }
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: 'Inter', sans-serif;
+    }
+
+    body {
+        background-color: var(--bg-primary);
+        color: var(--text-main);
+        height: 100vh;
+        display: flex;
+        overflow: hidden;
+    }
+
+    /* Dashboard Layout */
+    .dashboard-container {
+        display: flex;
+        width: 100%;
+        height: 100vh;
+    }
+
+    /* Sidebar - Patient Vitals & Info */
+    .sidebar {
+        width: 340px;
+        background-color: var(--bg-sidebar);
+        border-right: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        padding: 24px;
+        justify-content: space-between;
+        z-index: 10;
+    }
+
+    .patient-profile {
+        text-align: center;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .avatar-container {
+        position: relative;
+        width: 90px;
+        height: 90px;
+        margin: 0 auto 12px;
+    }
+
+    .patient-avatar {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #cbd5e1;
+    }
+
+    .status-dot {
+        position: absolute;
+        bottom: 4px;
+        right: 4px;
+        width: 14px;
+        height: 14px;
+        background-color: #22c55e;
+        border-radius: 50%;
+        border: 2px solid white;
+    }
+
+    .patient-name {
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: var(--text-main);
+    }
+
+    .case-id {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 2px;
+    }
+
+    /* Vitals Section */
+    .vitals-section {
+        margin: 24px 0;
+        flex-grow: 1;
+        overflow-y: auto;
+    }
+
+    .section-title {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text-muted);
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+
+    .vital-card {
+        display: flex;
+        align-items: center;
+        background-color: var(--vitals-bg);
+        padding: 12px 16px;
+        border-radius: 12px;
+        margin-bottom: 10px;
+        transition: transform 0.2s;
+    }
+
+    .vital-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .vital-icon {
+        font-size: 1.25rem;
+        margin-right: 14px;
+        width: 24px;
+        text-align: center;
+    }
+
+    .icon-heart {
+        color: #ef4444;
+    }
+
+    .icon-bp {
+        color: #3b82f6;
+    }
+
+    .icon-temp {
+        color: #f59e0b;
+    }
+
+    .vital-info .vital-label {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+    }
+
+    .vital-info .vital-value {
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .case-summary {
+        background-color: #f8fafc;
+        border-left: 4px solid var(--primary-color);
+        padding: 12px;
+        border-radius: 4px 12px 12px 4px;
+        font-size: 0.85rem;
+        line-height: 1.4;
+        color: #334155;
+    }
+
+    /* Control Buttons */
+    .sidebar-footer {
+        padding-top: 16px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .btn-secondary {
+        width: 100%;
+        background: none;
+        border: 1px solid var(--border-color);
+        padding: 10px;
+        border-radius: 8px;
+        font-weight: 500;
+        color: #475569;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-secondary:hover {
+        background-color: #f1f5f9;
+        color: var(--text-main);
+    }
+
+    .btn-secondary.reset-btn {
+        margin-top: 8px;
+    }
+
+    .history-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 12px;
+        max-height: 300px;
+        overflow-y: auto;
+        padding-right: 4px;
+    }
+
+    .history-item {
+        background: #f8fafc;
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        padding: 14px 16px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        color: #334155;
+        text-align: left;
+        transition: background-color 0.2s, transform 0.2s;
+    }
+
+    .history-item:hover {
+        background: #eef2ff;
+        transform: translateX(2px);
+    }
+
+    .history-item strong {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--text-main);
+    }
+
+    .history-item span {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+    }
+
+    .history-empty {
+        margin-top: 12px;
+        padding: 14px;
+        background: #f8fafc;
+        border: 1px dashed var(--border-color);
+        border-radius: 12px;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .history-item:hover {
+        background: #eef2ff;
+    }
+
+    .empty-state {
+        text-align: center;
+        color: var(--text-muted);
+        padding: 24px 16px;
+        background: #ffffff;
+        border: 1px dashed var(--border-color);
+        border-radius: 14px;
+    }
+
+    .typing-indicator {
+        display: inline-flex;
+        gap: 6px;
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
+        width: fit-content;
+    }
+
+    .typing-indicator span {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        animation: pulse 1s infinite ease-in-out;
+    }
+
+    .typing-indicator span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .typing-indicator span:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        80%,
+        100% {
+            transform: scale(0.8);
+            opacity: 0.5;
+        }
+
+        40% {
+            transform: scale(1);
             opacity: 1;
-            transform: translateY(0);
         }
+    }
 
-        .toast.error {
-            background: #dc3545;
-        }
-    
+    /* Main Chat Area */
+    .chat-area {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        background-color: var(--bg-primary);
+        height: 100vh;
+    }
 
-    </style>
+    /* Chat Header */
+    .chat-header {
+        height: 75px;
+        background-color: #ffffff;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 32px;
+    }
+
+    .header-title h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .header-title p {
+        font-size: 0.85rem;
+        color: var(--accent-teal);
+        font-weight: 500;
+    }
+
+    .badge {
+        background-color: #ccfbf1;
+        color: #115e59;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    /* Chat Messages Container */
+    .messages-container {
+        flex-grow: 1;
+        padding: 32px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .message-row {
+        display: flex;
+        width: 100%;
+    }
+
+    .message-row.patient-msg {
+        justify-content: flex-start;
+    }
+
+    .message-row.user-msg {
+        justify-content: flex-end;
+    }
+
+    .message-bubble {
+        max-width: 65%;
+        padding: 16px 20px;
+        border-radius: 16px;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .patient-msg .message-bubble {
+        background-color: var(--bubble-patient);
+        color: var(--text-main);
+        border-bottom-left-radius: 4px;
+        border: 1px solid var(--border-color);
+    }
+
+    .user-msg .message-bubble {
+        background-color: var(--primary-color);
+        color: #ffffff;
+        border-bottom-right-radius: 4px;
+    }
+
+    .message-meta {
+        font-size: 0.75rem;
+        margin-top: 6px;
+        display: block;
+    }
+
+    .patient-msg .message-meta {
+        color: var(--text-muted);
+    }
+
+    .user-msg .message-meta {
+        color: #c7d2fe;
+        text-align: right;
+    }
+
+    /* Input Area Footer */
+    .chat-footer {
+        padding: 24px 32px;
+        background-color: #ffffff;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .input-wrapper {
+        display: flex;
+        background-color: #f1f5f9;
+        border-radius: 14px;
+        padding: 6px 8px;
+        align-items: center;
+        border: 2px solid transparent;
+        transition: all 0.2s;
+    }
+
+    .input-wrapper:focus-within {
+        background-color: #ffffff;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    }
+
+    .chat-input {
+        flex-grow: 1;
+        border: none;
+        background: transparent;
+        padding: 12px;
+        font-size: 0.95rem;
+        color: var(--text-main);
+        outline: none;
+    }
+
+    .chat-input::placeholder {
+        color: #94a3b8;
+    }
+
+    .btn-send {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s;
+    }
+
+    .btn-send:hover {
+        background-color: var(--primary-hover);
+    }
+
+    /* Custom Scrollbar for premium feel */
+    ::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
+    .history-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        margin-bottom: 8px;
+        border-radius: 8px;
+        background: #f8f8f8;
+    }
+
+    .history-content {
+        flex: 1;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .delete-btn {
+        border: none;
+        background: transparent;
+        color: #ff4d4d;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 5px 10px;
+    }
+
+    .delete-btn:hover {
+        color: #d60000;
+    }
+
+    .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #28a745;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        opacity: 0;
+        transform: translateY(-20px);
+        transition: all .3s ease;
+        z-index: 9999;
+    }
+
+    .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .toast.error {
+        background: #dc3545;
+    }
+</style>
+
 <body>
 
     <div class="dashboard-container">
@@ -673,8 +670,11 @@
             const bubble = document.createElement('div');
             bubble.className = 'message-bubble';
             bubble.innerHTML = `${content}<span class="message-meta">${meta}</span>`;
+
+
             row.appendChild(bubble);
             messagesContainer.appendChild(row);
+
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
@@ -833,61 +833,111 @@
         }
 
         async function sendMessage() {
+
             const message = chatInput.value.trim();
+
             if (!message) return;
+
             if (!accessToken) {
-                addMessage('assistant', 'You must be signed in before sending messages.', 'Patient • error');
+                addMessage(
+                    "assistant",
+                    "You must be signed in before sending messages.",
+                    "Patient • error"
+                );
                 return;
             }
 
-            addMessage('user', message, 'You • just now');
-            chatInput.value = '';
+            addMessage("user", message, "You • just now");
+            chatInput.value = "";
             setLoading(true);
 
             try {
+
                 const payload = {
                     message: message,
                     conversation_id: currentConversationId
                 };
 
                 const response = await fetch(API_URL, {
-                    method: 'POST',
+                    method: "POST",
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${accessToken}`
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${accessToken}`
                     },
                     body: JSON.stringify(payload)
                 });
 
-                let data = null;
-                const contentType = response.headers.get('content-type') || '';
-                if (contentType.includes('application/json')) {
-                    data = await response.json();
-                } else {
-                    const text = await response.text();
-                    throw new Error(text || `HTTP ${response.status}`);
-                }
-
                 if (!response.ok) {
-                    throw new Error(data.detail || data.message || 'Backend returned an error.');
+                    throw new Error("Backend error");
                 }
 
-                const reply = data.response || 'No response received.';
-                currentConversationId = data.conversation_id;
-                addMessage('assistant', reply, 'Patient • just now');
-
-                
-                await saveConversation(message, reply);
-                await loadConversations();
-            } catch (error) {
-                addMessage('assistant', `Sorry, I could not reach the backend. ${error.message}`, 'Patient • error');
-            } finally {
+                // Remove typing dots
                 setLoading(false);
-            }
-        }
 
+                // Create assistant message bubble
+                const row = document.createElement("div");
+                row.className = "message-row patient-msg";
+
+                const bubble = document.createElement("div");
+                bubble.className = "message-bubble";
+
+
+
+                const textSpan = document.createElement("span");
+                const meta = document.createElement("span");
+
+                meta.className = "message-meta";
+                meta.textContent = "Patient • just now";
+
+                bubble.appendChild(textSpan);
+                bubble.appendChild(meta);
+
+                row.appendChild(bubble);
+                messagesContainer.appendChild(row);
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                let reply = "";
+
+                while (true) {
+
+                    const { done, value } = await reader.read();
+
+                    if (done) break;
+
+                    const chunk = decoder.decode(value);
+
+                    reply += chunk;
+
+                    textSpan.textContent = reply;
+
+                    messagesContainer.scrollTop =
+                        messagesContainer.scrollHeight;
+                }
+
+                await saveConversation(message, reply);
+
+                await loadConversations();
+
+
+            }
+            catch (error) {
+
+                setLoading(false);
+
+                addMessage(
+                    "assistant",
+                    "Sorry, I could not reach the backend.",
+                    "Patient • error"
+                );
+
+                console.error(error);
+            }
+
+        }
         function resetChat() {
-           
+
             currentConversationId = null;
             messagesContainer.innerHTML = '';
             addMessage('assistant', 'The simulation has been reset. Please start a new clinical conversation.', 'Patient • reset');
