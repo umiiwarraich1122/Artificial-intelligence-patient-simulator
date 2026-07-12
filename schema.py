@@ -11,3 +11,32 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     response: str
     conversation_id: str
+
+
+class SaveMessageRequest(BaseModel):
+    conversation_id: Optional[str] = None
+    user_message: str
+    ai_message: str
+
+
+class SaveMessageResponse(BaseModel):
+    conversation_id: str
+
+
+class ConversationItem(BaseModel):
+    id: str
+    created_at: Optional[str] = None
+
+
+class ConversationsResponse(BaseModel):
+    conversations: List[ConversationItem]
+
+
+class MessageItem(BaseModel):
+    sender: str
+    content: str
+    created_at: Optional[str] = None
+
+
+class HistoryResponse(BaseModel):
+    messages: List[MessageItem]

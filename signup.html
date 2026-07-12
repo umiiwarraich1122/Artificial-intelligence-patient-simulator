@@ -370,9 +370,13 @@ your clinical communication skills.
 <script type="module">
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
+// ⚠️ SECURITY: this MUST be the Supabase "anon / public" key (Project Settings > API),
+// never the "service_role" key. The service_role key bypasses Row Level Security and
+// must only ever live server-side (e.g. in the backend's .env). The key below was a
+// service_role key — replace it with your anon key and rotate the service_role key.
 const supabase = createClient(
     "https://lwpblqvieqvfkvrbvtwi.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3cGJscXZpZXF2Zmt2cmJ2dHdpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MzY1NDAwNSwiZXhwIjoyMDk5MjMwMDA1fQ.ihRKIE1ri8GgVoFr35hwFNLC4E4H-Wh-EwIumyNL8Vc"
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3cGJscXZpZXF2Zmt2cmJ2dHdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2NTQwMDUsImV4cCI6MjA5OTIzMDAwNX0.gTgjavi7n_LuP7bFvDDMoOcwCiYNReAET9IOZMc_8jg"
 );
 
 async function loginGoogle() {

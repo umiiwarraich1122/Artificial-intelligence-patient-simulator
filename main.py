@@ -8,7 +8,14 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from openai import OpenAI
-from schema import ChatRequest, ChatResponse
+from schema import (
+    ChatRequest,
+    ChatResponse,
+    SaveMessageRequest,
+    SaveMessageResponse,
+    ConversationsResponse,
+    HistoryResponse,
+)
 from supabase import create_client
 from supabase_auth.errors import AuthApiError
 
@@ -38,6 +45,26 @@ def create_supabase_client_for_user(access_token: str):
     except (AuthApiError, IndexError):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Supabase access token")
     return supabase_client
+
+
+def get_current_supabase_user(access_token: str):
+    """Return (supabase_client, user_id) for a valid Supabase access token.
+
+    Uses a session-scoped client (not the raw service-role client) so that
+    Row Level Security policies on the `conversations` / `messages` tables
+    are what actually enforce per-user isolation.
+    """
+    supabase_client = create_supabase_client_for_user(access_token)
+    try:
+        user_response = supabase_client.auth.get_user(access_token)
+    except AuthApiError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Supabase access token")
+
+    user = getattr(user_response, "user", None) if user_response else None
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Supabase access token")
+
+    return supabase_client, user.id
 
 
 def initialize_client():
@@ -175,6 +202,92 @@ async def chat_with_llm(request: ChatRequest, access_token: str = Depends(get_be
         raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
+
+@app.post("/chat/save", response_model=SaveMessageResponse)
+async def save_message(payload: SaveMessageRequest, access_token: str = Depends(get_bearer_token)):
+    supabase_client, user_id = get_current_supabase_user(access_token)
+
+    conversation_id = payload.conversation_id or str(uuid4())
+
+    try:
+        # Ensure the conversation row exists and belongs to this user.
+        existing = (
+            supabase_client.table("conversations")
+            .select("id, user_id")
+            .eq("id", conversation_id)
+            .execute()
+        )
+
+        if not existing.data:
+            supabase_client.table("conversations").insert(
+                {"id": conversation_id, "user_id": user_id}
+            ).execute()
+        elif existing.data[0].get("user_id") != user_id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Conversation belongs to another user")
+
+        supabase_client.table("messages").insert(
+            [
+                {"conversation_id": conversation_id, "sender": "user", "content": payload.user_message},
+                {"conversation_id": conversation_id, "sender": "ai", "content": payload.ai_message},
+            ]
+        ).execute()
+    except HTTPException:
+        raise
+    except Exception as exc:
+        print(f"❌ /chat/save failed: {exc!r}")
+        raise HTTPException(status_code=500, detail=f"Could not save conversation: {exc}")
+
+    return SaveMessageResponse(conversation_id=conversation_id)
+
+
+@app.get("/chat/conversations", response_model=ConversationsResponse)
+async def list_conversations(access_token: str = Depends(get_bearer_token)):
+    supabase_client, user_id = get_current_supabase_user(access_token)
+
+    try:
+        result = (
+            supabase_client.table("conversations")
+            .select("id, created_at")
+            .eq("user_id", user_id)
+            .order("created_at", desc=True)
+            .execute()
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Could not load conversations: {exc}")
+
+    return ConversationsResponse(conversations=result.data or [])
+
+
+@app.get("/chat/history/{conversation_id}", response_model=HistoryResponse)
+async def get_conversation_history(conversation_id: str, access_token: str = Depends(get_bearer_token)):
+    supabase_client, user_id = get_current_supabase_user(access_token)
+
+    try:
+        convo = (
+            supabase_client.table("conversations")
+            .select("id")
+            .eq("id", conversation_id)
+            .eq("user_id", user_id)
+            .execute()
+        )
+        if not convo.data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found")
+
+        result = (
+            supabase_client.table("messages")
+            .select("sender, content, created_at")
+            .eq("conversation_id", conversation_id)
+            .order("created_at")
+            .execute()
+        )
+    except HTTPException:
+        raise
+    except Exception as exc:
+        print(f"❌ /chat/history failed: {exc!r}")
+        raise HTTPException(status_code=500, detail=f"Could not load history: {exc}")
+
+    return HistoryResponse(messages=result.data or [])
+
 
 @app.get("/")
 def home():

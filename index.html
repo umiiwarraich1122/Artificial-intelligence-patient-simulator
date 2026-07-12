@@ -547,9 +547,13 @@
         const resetBtn = document.getElementById('resetBtn');
         const historyList = document.getElementById('historyList');
 
-        const supabase = createClient(
-            "https://lwpblqvieqvfkvrbvtwi.supabase.co",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3cGJscXZpZXF2Zmt2cmJ2dHdpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MzY1NDAwNSwiZXhwIjoyMDk5MjMwMDA1fQ.ihRKIE1ri8GgVoFr35hwFNLC4E4H-Wh-EwIumyNL8Vc"
+        // ⚠️ SECURITY: this MUST be the Supabase "anon / public" key (Project Settings > API),
+        // never the "service_role" key. The service_role key bypasses Row Level Security and
+        // must only ever live server-side (e.g. in the backend's .env). Replace below and
+        // rotate the service_role key that was previously here.
+       const supabase = createClient(
+    "https://lwpblqvieqvfkvrbvtwi.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3cGJscXZpZXF2Zmt2cmJ2dHdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2NTQwMDUsImV4cCI6MjA5OTIzMDAwNX0.gTgjavi7n_LuP7bFvDDMoOcwCiYNReAET9IOZMc_8jg"
         );
 
         let chatHistory = [];
@@ -602,6 +606,7 @@
         }
 
         async function saveConversation(message, reply) {
+            if (!accessToken) return;
             if (!currentConversationId) {
                 currentConversationId = createConversationId();
             }
@@ -613,26 +618,43 @@
                     ai_message: reply
                 };
 
-                await fetch(SAVE_URL, {
+                const response = await fetch(SAVE_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
                     body: JSON.stringify(payload)
                 });
+
+                if (!response.ok) {
+                    const errBody = await response.json().catch(() => ({}));
+                    console.error('Save failed:', response.status, errBody.detail || errBody);
+                }
             } catch (error) {
                 console.error('Could not save conversation:', error);
             }
         }
 
         async function loadConversationHistory(conversationId) {
+            if (!accessToken) return;
             currentConversationId = conversationId;
             messagesContainer.innerHTML = '';
             try {
-                const response = await fetch(`${HISTORY_URL}/${conversationId}`);
+                const response = await fetch(`${HISTORY_URL}/${conversationId}`, {
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                });
                 const data = await response.json();
                 if (response.ok && data.messages) {
+                    if (data.messages.length === 0) {
+                        addMessage('assistant', 'No messages found for this conversation.', 'Patient • info');
+                    }
                     data.messages.forEach(msg => {
                         addMessage(msg.sender === 'user' ? 'user' : 'assistant', msg.content, `${msg.sender === 'user' ? 'You' : 'Patient'} • ${new Date(msg.created_at).toLocaleString()}`);
                     });
+                } else {
+                    console.error('History load failed:', response.status, data.detail || data);
+                    addMessage('assistant', `Could not load history: ${data.detail || 'unknown error'}`, 'Patient • error');
                 }
             } catch (error) {
                 console.error('Could not load history:', error);
@@ -640,8 +662,11 @@
         }
 
         async function loadConversations() {
+            if (!accessToken) return;
             try {
-                const response = await fetch(CONVERSATIONS_URL);
+                const response = await fetch(CONVERSATIONS_URL, {
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                });
                 const data = await response.json();
                 historyList.innerHTML = '';
                 if (response.ok && data.conversations && data.conversations.length > 0) {

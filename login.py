@@ -7,12 +7,12 @@ SUPABASE_KET="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KET)
 
-# new_row={"Fitrst_name":"Shaheer","Last_name":"hassan","Email":"shaheer.hassan@example.com" ,"pasword":"shaheer123"}
+new_row={"sender":"Shaheer","content":"hassan","created_at":"shaheer.hassan@example.com" ,"password":"shaheer123"}
 
 # supabase.table('userdata').insert(new_row).execute()
 
 
 
 
-results=supabase.table("userdata").select("*").execute()
+results=supabase.table("message").select("*").execute()
 print(results)
