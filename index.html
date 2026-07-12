@@ -631,13 +631,13 @@
         import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
         const API_URL = '/chat';
-        const SAVE_URL = 'http://127.0.0.1:8000/chat/save';
-        const HISTORY_URL = 'http://127.0.0.1:8000/chat/history';
-        const CONVERSATIONS_URL = 'http://127.0.0.1:8000/chat/conversations';
+        const SAVE_URL = '/chat/save';
+        const HISTORY_URL = '/chat/history';
+        const CONVERSATIONS_URL = '/chat/conversations';
         const messagesContainer = document.getElementById('messagesContainer');
         const chatInput = document.getElementById('chatInput');
         const sendBtn = document.getElementById('sendBtn');
-        const resetBtn = document.getElementById('resetBtn');
+        const resetBtn = document.getElementById('resetBtn');x  
         const historyList = document.getElementById('historyList');
 
         // ⚠️ SECURITY: this MUST be the Supabase "anon / public" key (Project Settings > API),
