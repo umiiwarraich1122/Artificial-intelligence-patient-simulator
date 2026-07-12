@@ -1,13 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Patient Simulator - Professional Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+   
+
+</head>
+<style>
+
     
-    <style>
         :root {
             --bg-primary: #f8fafc;
             --bg-sidebar: #ffffff;
@@ -139,9 +144,17 @@
             text-align: center;
         }
 
-        .icon-heart { color: #ef4444; }
-        .icon-bp { color: #3b82f6; }
-        .icon-temp { color: #f59e0b; }
+        .icon-heart {
+            color: #ef4444;
+        }
+
+        .icon-bp {
+            color: #3b82f6;
+        }
+
+        .icon-temp {
+            color: #f59e0b;
+        }
 
         .vital-info .vital-label {
             font-size: 0.75rem;
@@ -275,12 +288,27 @@
             animation: pulse 1s infinite ease-in-out;
         }
 
-        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
 
         @keyframes pulse {
-            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
-            40% { transform: scale(1); opacity: 1; }
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
 
         /* Main Chat Area */
@@ -352,7 +380,7 @@
             border-radius: 16px;
             font-size: 0.95rem;
             line-height: 1.5;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
             position: relative;
         }
 
@@ -375,8 +403,14 @@
             display: block;
         }
 
-        .patient-msg .message-meta { color: var(--text-muted); }
-        .user-msg .message-meta { color: #c7d2fe; text-align: right; }
+        .patient-msg .message-meta {
+            color: var(--text-muted);
+        }
+
+        .user-msg .message-meta {
+            color: #c7d2fe;
+            text-align: right;
+        }
 
         /* Input Area Footer */
         .chat-footer {
@@ -437,22 +471,80 @@
         ::-webkit-scrollbar {
             width: 6px;
         }
+
         ::-webkit-scrollbar-track {
             background: transparent;
         }
+
         ::-webkit-scrollbar-thumb {
             background: #cbd5e1;
             border-radius: 10px;
         }
+
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            background: #f8f8f8;
+        }
+
+        .history-content {
+            flex: 1;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .delete-btn {
+            border: none;
+            background: transparent;
+            color: #ff4d4d;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+
+        .delete-btn:hover {
+            color: #d60000;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all .3s ease;
+            z-index: 9999;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.error {
+            background: #dc3545;
+        }
+    
+
     </style>
-</head>
-<body>  
+<body>
 
     <div class="dashboard-container">
-        
+
         <aside class="sidebar">
             <div class="patient-profile">
                 <div class="avatar-container">
@@ -465,7 +557,7 @@
 
             <div class="vitals-section">
                 <p class="section-title">Live Vitals</p>
-                
+
                 <div class="vital-card">
                     <i class="fa-solid fa-heartbeat vital-icon icon-heart"></i>
                     <div class="vital-info">
@@ -493,7 +585,8 @@
                 <div class="history-section">
                     <p class="section-title">Conversation History</p>
                     <div id="historyList" class="history-list"></div>
-                    <div class="history-empty" id="historyEmpty">No conversations yet. Start a new chat to save history.</div>
+                    <div class="history-empty" id="historyEmpty">No conversations yet. Start a new chat to save history.
+                    </div>
                 </div>
             </div>
 
@@ -516,7 +609,9 @@
             <div class="messages-container" id="messagesContainer">
                 <div class="message-row patient-msg">
                     <div class="message-bubble">
-                        Doctor, mujhe pichle do ghante se seene mein bohot ajeeb sa, tez dard ho raha hai. Lag raha hai jaise koi bohot bhaari wazan rakh diya ho... Yeh dard ab mere khabey (left) kandhe ki taraf ja raha hai. Mujhe thodi saans lene mein bhi takleef ho rahi hai.
+                        Doctor, mujhe pichle do ghante se seene mein bohot ajeeb sa, tez dard ho raha hai. Lag raha hai
+                        jaise koi bohot bhaari wazan rakh diya ho... Yeh dard ab mere khabey (left) kandhe ki taraf ja
+                        raha hai. Mujhe thodi saans lene mein bhi takleef ho rahi hai.
                         <span class="message-meta">Patient • 10:42 AM</span>
                     </div>
                 </div>
@@ -524,14 +619,15 @@
 
             <footer class="chat-footer">
                 <div class="input-wrapper">
-                    <input type="text" class="chat-input" id="chatInput" placeholder="Ask a clinical question or order a diagnostic test...">
+                    <input type="text" class="chat-input" id="chatInput"
+                        placeholder="Ask a clinical question or order a diagnostic test...">
                     <button class="btn-send" id="sendBtn" title="Send Message" type="button">
                         <i class="fa-solid fa-paper-plane"></i>
                     </button>
                 </div>
             </footer>
         </main>
-
+        <div id="toast" class="toast"></div>
     </div>
 
     <script type="module">
@@ -551,9 +647,9 @@
         // never the "service_role" key. The service_role key bypasses Row Level Security and
         // must only ever live server-side (e.g. in the backend's .env). Replace below and
         // rotate the service_role key that was previously here.
-       const supabase = createClient(
-    "https://lwpblqvieqvfkvrbvtwi.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3cGJscXZpZXF2Zmt2cmJ2dHdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2NTQwMDUsImV4cCI6MjA5OTIzMDAwNX0.gTgjavi7n_LuP7bFvDDMoOcwCiYNReAET9IOZMc_8jg"
+        const supabase = createClient(
+            "https://lwpblqvieqvfkvrbvtwi.supabase.co",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3cGJscXZpZXF2Zmt2cmJ2dHdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2NTQwMDUsImV4cCI6MjA5OTIzMDAwNX0.gTgjavi7n_LuP7bFvDDMoOcwCiYNReAET9IOZMc_8jg"
         );
 
         let chatHistory = [];
@@ -672,13 +768,59 @@
                 if (response.ok && data.conversations && data.conversations.length > 0) {
                     document.getElementById('historyEmpty').style.display = 'none';
                     data.conversations.forEach(conv => {
-                        const btn = document.createElement('button');
-                        btn.className = 'history-item';
-                        btn.type = 'button';
-                        const title = `Conversation ${new Date(conv.created_at).toLocaleString()}`;
-                        btn.innerHTML = `<strong>${title}</strong><span>Tap to reopen</span>`;
-                        btn.addEventListener('click', () => loadConversationHistory(conv.id));
-                        historyList.appendChild(btn);
+                        const item = document.createElement('div');
+                        item.className = 'history-item';
+
+                        const title = document.createElement('div');
+                        title.className = 'history-content';
+                        title.innerHTML = `
+    <strong>Conversation ${new Date(conv.created_at).toLocaleString()}</strong>
+    <span>Tap to reopen</span>
+`;
+
+                        title.addEventListener('click', () => loadConversationHistory(conv.id));
+
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.className = 'delete-btn';
+                        deleteBtn.innerHTML = '&times;';
+                        deleteBtn.title = 'Delete Conversation';
+
+                        deleteBtn.addEventListener('click', async (e) => {
+                            e.stopPropagation();
+
+                            if (!confirm("Delete this conversation?")) return;
+
+                            try {
+                                const response = await fetch(`http://127.0.0.1:8000/chat/conversation/${conv.id}`, {
+                                    method: "DELETE",
+                                    headers: {
+                                        "Authorization": `Bearer ${accessToken}`
+                                    }
+                                });
+
+                                if (response.ok) {
+
+                                    loadConversations();
+
+                                    chatMessages.innerHTML = "";
+
+                                    showToast("Conversation deleted successfully.");
+
+                                } else {
+
+                                    showToast("Unable to delete conversation.", true);
+
+                                }
+                            } catch (err) {
+                                console.error(err);
+                                alert("Error deleting conversation.");
+                            }
+                        });
+
+                        item.appendChild(title);
+                        item.appendChild(deleteBtn);
+
+                        historyList.appendChild(item);
                     });
                 } else {
                     document.getElementById('historyEmpty').style.display = 'block';
@@ -705,8 +847,7 @@
             try {
                 const payload = {
                     message: message,
-                    conversation_id: currentConversationId,
-                    chat_history: chatHistory
+                    conversation_id: currentConversationId
                 };
 
                 const response = await fetch(API_URL, {
@@ -735,8 +876,7 @@
                 currentConversationId = data.conversation_id;
                 addMessage('assistant', reply, 'Patient • just now');
 
-                chatHistory.push({ role: 'user', content: message });
-                chatHistory.push({ role: 'assistant', content: reply });
+                
                 await saveConversation(message, reply);
                 await loadConversations();
             } catch (error) {
@@ -747,7 +887,7 @@
         }
 
         function resetChat() {
-            chatHistory = [];
+           
             currentConversationId = null;
             messagesContainer.innerHTML = '';
             addMessage('assistant', 'The simulation has been reset. Please start a new clinical conversation.', 'Patient • reset');
@@ -766,6 +906,29 @@
         resetChat();
         await initializeAuth();
         await loadConversations();
+
+
+
+        function showToast(message, isError = false) {
+
+            const toast = document.getElementById("toast");
+
+            toast.textContent = message;
+
+            if (isError) {
+                toast.classList.add("error");
+            } else {
+                toast.classList.remove("error");
+            }
+
+            toast.classList.add("show");
+
+            setTimeout(() => {
+                toast.classList.remove("show");
+            }, 3000);
+
+        }
     </script>
 </body>
+
 </html>
