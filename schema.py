@@ -25,6 +25,17 @@ class SaveMessageResponse(BaseModel):
 class ConversationItem(BaseModel):
     id: str
     created_at: Optional[str] = None
+    summary: Optional[str] = None
+    message_count: Optional[int] = 0
+    last_updated: Optional[str] = None
+    duration_mins: Optional[int] = 0
+
+
+class UpdateSummaryRequest(BaseModel):
+    conversation_id: str
+    custom_title: Optional[str] = None
+    pinned: Optional[bool] = None
+    status: Optional[str] = None
 
 
 class ConversationsResponse(BaseModel):

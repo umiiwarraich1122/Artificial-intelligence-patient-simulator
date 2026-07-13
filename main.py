@@ -7,6 +7,7 @@ from typing import Optional
 from uuid import uuid4
 from fastapi import FastAPI, HTTPException, Header, Depends, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+import json
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
@@ -18,6 +19,7 @@ from schema import (
     SaveMessageResponse,
     ConversationsResponse,
     HistoryResponse,
+    UpdateSummaryRequest,
 )
 from supabase import create_client
 from supabase_auth.errors import AuthApiError
@@ -369,6 +371,89 @@ async def chat_with_llm(
         )
 
 
+def generate_clinical_summary(conversation_history: list) -> str:
+    global client
+    if not client:
+        initialize_client()
+
+    # Get patient messages (sender == 'ai') and user messages (sender == 'user')
+    history_text = ""
+    first_patient_msg = ""
+    for msg in conversation_history:
+        role = "Clinician" if msg.get("sender") == "user" else "Patient"
+        history_text += f"{role}: {msg.get('content')}\n"
+        if msg.get("sender") == "ai" and not first_patient_msg:
+            first_patient_msg = msg.get("content")
+
+    # Clean and get first sentence/words for deterministic fallback title
+    fallback_title = "New Consultation"
+    if first_patient_msg:
+        sentences = re.split(r'[.!?]', first_patient_msg)
+        first_sentence = sentences[0].strip() if sentences else first_patient_msg
+        if len(first_sentence) > 40:
+            fallback_title = first_sentence[:37] + "..."
+        else:
+            fallback_title = first_sentence
+
+    fallback_summary = first_patient_msg[:77] + "..." if len(first_patient_msg) > 80 else first_patient_msg
+
+    default_data = {
+        "title": fallback_title,
+        "summary": fallback_summary,
+        "pinned": False,
+        "custom_title": None,
+        "status": "In Progress"
+    }
+
+    if not client:
+        return json.dumps(default_data)
+
+    try:
+        api_key = os.getenv("GROQ_API_KEY") or os.getenv("OPENAI_API_KEY") or ""
+        model_name = (
+            "llama-3.3-70b-versatile"
+            if api_key.startswith("gsk_")
+            else "gpt-4o-mini"
+        )
+
+        prompt = (
+            "You are an expert medical scribe. Analyze this clinician-patient dialogue and output a JSON object containing:\n"
+            "1. 'title': A short, professional clinical title of 3-5 words summarizing the chief complaint or discussion topic (e.g. 'Severe Abdominal Pain', 'Fever and Persistent Cough'). Do not use generic names or quotes.\n"
+            "2. 'summary': A concise clinical summary of 1-2 lines, maximum 80 characters, describing the patient's reported symptoms.\n\n"
+            "Format your response as a valid JSON object ONLY. Example:\n"
+            "{\n"
+            "  \"title\": \"Acute Back Pain\",\n"
+            "  \"summary\": \"Patient reports sudden lumbar pain after lifting heavy boxes yesterday.\"\n"
+            "}\n\n"
+            f"Dialogue:\n{history_text}"
+        )
+
+        response = client.chat.completions.create(
+            model=model_name,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.2,
+            max_tokens=100,
+            response_format={"type": "json_object"} if not api_key.startswith("gsk_") else None
+        )
+
+        content = response.choices[0].message.content.strip()
+        data = json.loads(content)
+
+        title = data.get("title", fallback_title)
+        summary = data.get("summary", fallback_summary)
+
+        # Guarantee max 80 characters in summary
+        if len(summary) > 80:
+            summary = summary[:77] + "..."
+
+        default_data["title"] = title
+        default_data["summary"] = summary
+        return json.dumps(default_data)
+    except Exception as e:
+        print(f"Error in generating clinical summary: {e}")
+        return json.dumps(default_data)
+
+
 @app.post("/chat/save")
 async def save_message(payload: SaveMessageRequest, access_token: str = Depends(get_bearer_token)):
     supabase_client, user_id = get_current_supabase_user(access_token)
@@ -391,12 +476,65 @@ async def save_message(payload: SaveMessageRequest, access_token: str = Depends(
         elif existing.data[0].get("user_id") != user_id:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Conversation belongs to another user")
 
+        # Check if a summary message already exists for this conversation
+        summary_record = (
+            supabase_client.table("messages")
+            .select("id, content")
+            .eq("conversation_id", conversation_id)
+            .like("content", "__SUMMARY_JSON__%")
+            .execute()
+        )
+
+        # Insert user and ai messages
         supabase_client.table("messages").insert(
             [
                 {"conversation_id": conversation_id, "sender": "user", "content": payload.user_message},
                 {"conversation_id": conversation_id, "sender": "ai", "content": payload.ai_message},
             ]
         ).execute()
+
+        # Load all chat messages for this conversation to build context for title/summary generation
+        all_messages_res = (
+            supabase_client.table("messages")
+            .select("sender, content, created_at")
+            .eq("conversation_id", conversation_id)
+            .order("created_at", desc=False)
+            .execute()
+        )
+        chat_messages = [msg for msg in all_messages_res.data or [] if msg["sender"] in ("user", "ai")]
+
+        try:
+            # Generate new metadata based on full conversation history
+            new_metadata_str = generate_clinical_summary(chat_messages)
+            new_metadata = json.loads(new_metadata_str)
+
+            if summary_record.data:
+                # Summary already exists, merge it to keep pins, custom renames, and status
+                old_raw = summary_record.data[0].get("content", "")
+                old_content = old_raw[len("__SUMMARY_JSON__:"):] if old_raw.startswith("__SUMMARY_JSON__:") else old_raw
+                try:
+                    old_json = json.loads(old_content)
+                    if isinstance(old_json, dict):
+                        # Retain user custom fields
+                        for key in ["pinned", "custom_title", "status"]:
+                            if key in old_json:
+                                new_metadata[key] = old_json[key]
+                except Exception:
+                    # If older legacy format, retain old text as custom_title if appropriate
+                    if old_content and not old_content.startswith("{"):
+                        new_metadata["custom_title"] = old_content
+
+                supabase_client.table("messages").update(
+                    {"content": f"__SUMMARY_JSON__:{json.dumps(new_metadata)}"}
+                ).eq("id", summary_record.data[0]["id"]).execute()
+            else:
+                # Insert new summary record (using 'ai' sender to bypass CHECK constraint)
+                supabase_client.table("messages").insert(
+                    {"conversation_id": conversation_id, "sender": "ai", "content": f"__SUMMARY_JSON__:{json.dumps(new_metadata)}"}
+                ).execute()
+        except Exception as sum_exc:
+            print(f"⚠️ Could not generate summary: {sum_exc}")
+
     except HTTPException:
         raise
     except Exception as exc:
@@ -418,10 +556,174 @@ async def list_conversations(access_token: str = Depends(get_bearer_token)):
             .order("created_at", desc=True)
             .execute()
         )
+        conversations = result.data or []
+
+        if conversations:
+            convo_ids = [c["id"] for c in conversations]
+
+            # 1. Fetch summaries (identified by special prefix)
+            summaries_result = (
+                supabase_client.table("messages")
+                .select("conversation_id, content")
+                .in_("conversation_id", convo_ids)
+                .like("content", "__SUMMARY_JSON__%")
+                .execute()
+            )
+            
+            summaries_map = {}
+            for row in summaries_result.data or []:
+                raw_content = row["content"]
+                if raw_content.startswith("__SUMMARY_JSON__:"):
+                    summaries_map[row["conversation_id"]] = raw_content[len("__SUMMARY_JSON__:"):]
+
+            # 2. Fetch all messages in a batch to calculate stats (message count, duration, last updated)
+            messages_result = (
+                supabase_client.table("messages")
+                .select("conversation_id, sender, created_at")
+                .in_("conversation_id", convo_ids)
+                .order("created_at", desc=False)
+                .execute()
+            )
+
+            stats = {}
+            for row in messages_result.data or []:
+                c_id = row["conversation_id"]
+                if c_id not in stats:
+                    stats[c_id] = []
+                stats[c_id].append(row)
+
+            from datetime import datetime
+
+            for conv in conversations:
+                c_id = conv["id"]
+                conv_messages = stats.get(c_id, [])
+                chat_messages = [m for m in conv_messages if m["sender"] in ("user", "ai")]
+
+                # Count chat messages
+                conv["message_count"] = len(chat_messages)
+
+                # Get last updated timestamp
+                if conv_messages:
+                    conv["last_updated"] = max(m["created_at"] for m in conv_messages)
+                else:
+                    conv["last_updated"] = conv["created_at"]
+
+                # Calculate duration in minutes
+                if len(chat_messages) >= 2:
+                    try:
+                        def parse_dt(dt_str):
+                            dt_str = dt_str.replace("Z", "+00:00")
+                            if "." in dt_str:
+                                dt_str = dt_str.split(".")[0]
+                            return datetime.fromisoformat(dt_str)
+
+                        first_t = parse_dt(chat_messages[0]["created_at"])
+                        last_t = parse_dt(chat_messages[-1]["created_at"])
+                        diff = last_t - first_t
+                        conv["duration_mins"] = int(diff.total_seconds() / 60)
+                    except Exception as parse_err:
+                        print(f"Error parsing dates for duration: {parse_err}")
+                        conv["duration_mins"] = 0
+                else:
+                    conv["duration_mins"] = 0
+
+                # Set summary content (JSON string or older string fallback)
+                conv["summary"] = summaries_map.get(c_id) or "New Consultation"
+        else:
+            conversations = []
+
     except Exception as exc:
+        print(f"❌ list_conversations failed: {exc!r}")
         raise HTTPException(status_code=500, detail=f"Could not load conversations: {exc}")
 
-    return ConversationsResponse(conversations=result.data or [])
+    return ConversationsResponse(conversations=conversations)
+
+
+@app.post("/chat/summary/update")
+async def update_summary(payload: UpdateSummaryRequest, access_token: str = Depends(get_bearer_token)):
+    supabase_client, user_id = get_current_supabase_user(access_token)
+
+    try:
+        # Verify ownership of conversation
+        existing = (
+            supabase_client.table("conversations")
+            .select("id, user_id")
+            .eq("id", payload.conversation_id)
+            .execute()
+        )
+        if not existing.data or existing.data[0].get("user_id") != user_id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+
+        # Find existing summary record
+        summary_record = (
+            supabase_client.table("messages")
+            .select("id, content")
+            .eq("conversation_id", payload.conversation_id)
+            .like("content", "__SUMMARY_JSON__%")
+            .execute()
+        )
+
+        new_data = {}
+        if payload.custom_title is not None:
+            new_data["custom_title"] = payload.custom_title
+        if payload.pinned is not None:
+            new_data["pinned"] = payload.pinned
+        if payload.status is not None:
+            new_data["status"] = payload.status
+
+        if summary_record.data:
+            raw_content = summary_record.data[0].get("content", "")
+            current_content = raw_content[len("__SUMMARY_JSON__:"):] if raw_content.startswith("__SUMMARY_JSON__:") else raw_content
+            try:
+                current_json = json.loads(current_content)
+                if not isinstance(current_json, dict):
+                    current_json = {
+                        "title": current_content,
+                        "summary": "Initial intake discussion.",
+                        "pinned": False,
+                        "custom_title": None,
+                        "status": "In Progress"
+                    }
+            except Exception:
+                current_json = {
+                    "title": current_content,
+                    "summary": "Initial intake discussion.",
+                    "pinned": False,
+                    "custom_title": None,
+                    "status": "In Progress"
+                }
+
+            # Update keys
+            for k, v in new_data.items():
+                current_json[k] = v
+
+            json_content = f"__SUMMARY_JSON__:{json.dumps(current_json)}"
+            supabase_client.table("messages").update(
+                {"content": json_content}
+            ).eq("id", summary_record.data[0]["id"]).execute()
+        else:
+            # Create a brand new record (using 'ai' sender to bypass CHECK constraint)
+            default_data = {
+                "title": "New Consultation",
+                "summary": "Initial intake discussion.",
+                "pinned": payload.pinned or False,
+                "custom_title": payload.custom_title,
+                "status": payload.status or "In Progress"
+            }
+            json_content = f"__SUMMARY_JSON__:{json.dumps(default_data)}"
+            supabase_client.table("messages").insert({
+                "conversation_id": payload.conversation_id,
+                "sender": "ai",
+                "content": json_content
+            }).execute()
+
+    except HTTPException:
+        raise
+    except Exception as exc:
+        print(f"❌ /chat/summary/update failed: {exc!r}")
+        raise HTTPException(status_code=500, detail=f"Could not update summary: {exc}")
+
+    return {"status": "success"}
 
 
 @app.get("/chat/history/{conversation_id}", response_model=HistoryResponse)
@@ -475,6 +777,14 @@ async def delete_conversation(
 @app.get("/")
 def home():
     return FileResponse("signup.html")
+
+@app.get("/signup.html")
+def signup_page():
+    return FileResponse("signup.html")
+
+@app.get("/Ionstine.jpg")
+def get_avatar():
+    return FileResponse("Ionstine.jpg")
 
 @app.get("/chat")
 def chat_page():
