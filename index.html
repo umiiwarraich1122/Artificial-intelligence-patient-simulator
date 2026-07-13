@@ -1481,7 +1481,7 @@
             <footer class="consultation-footer">
                 <div class="clinical-input-container">
                     <input type="text" class="clinical-input" id="chatInput"
-                        placeholder="Ask your AI Medical Assistant..." disabled>
+                        placeholder="Interview the patient..." disabled>
                     <button class="btn-send-inquiry" id="sendBtn" title="Send Inquiry" type="button" disabled>
                         <i class="fa-solid fa-paper-plane"></i>
                     </button>
@@ -1722,7 +1722,7 @@
 
             const speaker = document.createElement('div');
             speaker.className = 'speaker-tag';
-            speaker.textContent = role === 'user' ? '👤 You' : '🤖 AI Medical Assistant';
+            speaker.textContent = role === 'user' ? '👤 You' : '🤕 Patient';
 
             const bubble = document.createElement('div');
             bubble.className = 'transcript-bubble';
@@ -1746,9 +1746,9 @@
                 loadingRow.className = 'transcript-row patient';
                 loadingRow.id = 'typingRow';
                 loadingRow.innerHTML = `
-                    <div class="speaker-tag">🤖 AI Medical Assistant</div>
+                    <div class="speaker-tag">🤕 Patient</div>
                     <div class="typing-loader" id="typingIndicator">
-                        <span>Analyzing symptoms</span>
+                        <span>Patient is thinking</span>
                         <div class="typing-dots">
                             <span></span><span></span><span></span>
                         </div>
@@ -1822,6 +1822,12 @@
         // Retrieve and load transcript for a historic conversation session
         async function loadConversationHistory(conversationId, summaryTitle = 'Active Case File') {
             if (!accessToken) return;
+            
+            // Auto close mobile drawers if open
+            if (typeof closeAllDrawers === 'function') {
+                closeAllDrawers();
+            }
+
             currentConversationId = conversationId;
             messagesContainer.innerHTML = '';
             
@@ -1832,7 +1838,7 @@
             // Enable inputs
             chatInput.disabled = false;
             sendBtn.disabled = false;
-            chatInput.placeholder = "Ask your AI Medical Assistant...";
+            chatInput.placeholder = "Interview the patient...";
             
             randomizeVitals();
 
@@ -1861,8 +1867,8 @@
                     
                     filteredMessages.forEach(msg => {
                         const sender = msg.sender === 'user' ? 'user' : 'assistant';
-                        const nameLabel = msg.sender === 'user' ? 'You' : 'AI Medical Assistant';
-                        addMessage(sender, msg.content, `${msg.sender === 'user' ? '👤' : '🤖'} ${nameLabel} • ${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`);
+                        const nameLabel = msg.sender === 'user' ? 'You' : 'Patient';
+                        addMessage(sender, msg.content, `${msg.sender === 'user' ? '👤' : '🤕'} ${nameLabel} • ${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`);
                     });
                 } else {
                     showToast("Could not load simulation logs.", true);
@@ -2306,7 +2312,7 @@
 
                 const speaker = document.createElement("div");
                 speaker.className = "speaker-tag";
-                speaker.textContent = "🤖 AI Medical Assistant";
+                speaker.textContent = "🤕 Patient";
 
                 const bubble = document.createElement("div");
                 bubble.className = "transcript-bubble";
@@ -2314,7 +2320,7 @@
                 const textSpan = document.createElement("span");
                 const meta = document.createElement("span");
                 meta.className = "bubble-meta";
-                meta.textContent = "Analyzing symptoms...";
+                meta.textContent = "Patient is thinking...";
 
                 bubble.appendChild(textSpan);
                 bubble.appendChild(meta);
@@ -2337,7 +2343,7 @@
                     messagesContainer.scrollTop = messagesContainer.scrollHeight;
                 }
 
-                meta.textContent = "🤖 AI Medical Assistant • Analysis Complete";
+                meta.textContent = "🤕 Patient • Completed";
 
                 // Save message exchange to Supabase database
                 await saveConversation(message, reply);
@@ -2414,7 +2420,7 @@
             
             chatInput.disabled = false;
             sendBtn.disabled = false;
-            chatInput.placeholder = "Ask your AI Medical Assistant...";
+            chatInput.placeholder = "Interview the patient...";
             chatInput.focus();
             
             randomizeVitals();
@@ -2423,7 +2429,7 @@
             if (welcome) welcome.remove();
 
             // Notify clinician
-            addMessage('assistant', 'System: Clinical simulator active. Ask your AI Medical Assistant a question to begin.', 'System • Ready');
+            addMessage('assistant', 'System: Clinical simulator active. Ask the patient a question to begin.', 'System • Ready');
         }
 
         // Local Notes Management (local storage)
