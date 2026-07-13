@@ -1435,10 +1435,18 @@
     <script type="module">
         import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
-        const API_URL = 'http://127.0.0.1:8000/chat';
-        const SAVE_URL = 'http://127.0.0.1:8000/chat/save';
-        const HISTORY_URL = 'http://127.0.0.1:8000/chat/history';
-        const CONVERSATIONS_URL = 'http://127.0.0.1:8000/chat/conversations';
+        const getBackendBase = () => {
+            if (window.location.port === "5500") {
+                return "http://127.0.0.1:8000";
+            }
+            return window.location.origin;
+        };
+        const BASE_BACKEND = getBackendBase();
+
+        const API_URL = `${BASE_BACKEND}/chat`;
+        const SAVE_URL = `${BASE_BACKEND}/chat/save`;
+        const HISTORY_URL = `${BASE_BACKEND}/chat/history`;
+        const CONVERSATIONS_URL = `${BASE_BACKEND}/chat/conversations`;
         
         const messagesContainer = document.getElementById('messagesContainer');
         const chatInput = document.getElementById('chatInput');
@@ -1884,7 +1892,7 @@
                     info.querySelector('.confirm-yes-btn').addEventListener('click', async (evt) => {
                         evt.stopPropagation();
                         try {
-                            const response = await fetch(`http://127.0.0.1:8000/chat/conversation/${conv.id}`, {
+                            const response = await fetch(`${BASE_BACKEND}/chat/conversation/${conv.id}`, {
                                 method: "DELETE",
                                 headers: {
                                     "Authorization": `Bearer ${accessToken}`
@@ -2046,7 +2054,7 @@
         async function updateConversationMetadata(conversationId, fields) {
             if (!accessToken) return;
             try {
-                const response = await fetch("http://127.0.0.1:8000/chat/summary/update", {
+                const response = await fetch(`${BASE_BACKEND}/chat/summary/update`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
