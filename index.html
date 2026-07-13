@@ -1185,19 +1185,199 @@
             background: rgba(255, 255, 255, 0.2);
         }
 
+        .mobile-drawer-close {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px;
+            transition: color 0.2s ease;
+            position: absolute;
+            top: 18px;
+            right: 18px;
+        }
+        
+        .mobile-drawer-close:hover {
+            color: var(--text-main);
+        }
+
+        .mobile-nav-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: rgba(9, 9, 11, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 900;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            box-sizing: border-box;
+        }
+        
+        body.light-theme .mobile-nav-header {
+            background: rgba(255, 255, 255, 0.7);
+        }
+        
+        .mobile-toggle-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease;
+        }
+        
+        body.light-theme .mobile-toggle-btn {
+            background: rgba(0, 0, 0, 0.03);
+        }
+        
+        .mobile-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        body.light-theme .mobile-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.06);
+        }
+        
+        .mobile-header-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text-main);
+            letter-spacing: -0.02em;
+        }
+        
+        .mobile-drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .mobile-drawer-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
         /* Responsive */
         @media(max-width: 1024px) {
-            .workspace-container {
-                grid-template-columns: 1fr;
+            .mobile-nav-header {
+                display: flex;
             }
-            .case-sidebar, .diagnostics-hub {
-                display: none;
+            .mobile-drawer-close {
+                display: block;
+            }
+            .workspace-container {
+                grid-template-columns: 1fr !important;
+                height: calc(100vh - 60px) !important;
+                margin-top: 60px !important;
+                padding: 0 !important;
+            }
+            .case-sidebar {
+                display: flex !important;
+                position: fixed !important;
+                top: 0;
+                left: -100%;
+                width: 290px;
+                height: 100vh;
+                z-index: 1001;
+                transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                background: rgba(9, 9, 11, 0.96) !important;
+                backdrop-filter: blur(30px) !important;
+                -webkit-backdrop-filter: blur(30px) !important;
+                box-shadow: 10px 0 30px rgba(0, 0, 0, 0.6) !important;
+                border-right: 1px solid var(--glass-border) !important;
+            }
+            body.light-theme .case-sidebar {
+                background: rgba(255, 255, 255, 0.96) !important;
+            }
+            .case-sidebar.drawer-open {
+                left: 0 !important;
+            }
+            .diagnostics-hub {
+                display: block !important;
+                position: fixed !important;
+                top: 0;
+                right: -100%;
+                width: 320px;
+                height: 100vh;
+                z-index: 1001;
+                transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                background: rgba(9, 9, 11, 0.96) !important;
+                backdrop-filter: blur(30px) !important;
+                -webkit-backdrop-filter: blur(30px) !important;
+                box-shadow: -10px 0 30px rgba(0, 0, 0, 0.6) !important;
+                border-left: 1px solid var(--glass-border) !important;
+                overflow-y: auto;
+                box-sizing: border-box;
+            }
+            body.light-theme .diagnostics-hub {
+                background: rgba(255, 255, 255, 0.96) !important;
+            }
+            .diagnostics-hub.drawer-open {
+                right: 0 !important;
+            }
+            .consultation-room {
+                border-left: none !important;
+                border-right: none !important;
+                height: 100% !important;
+            }
+            /* Adjust diagnostic layouts */
+            .ehr-section {
+                position: relative;
+            }
+        }
+        @media(max-width: 640px) {
+            .chat-message {
+                max-width: 85%;
+                padding: 12px 14px;
+            }
+            .welcome-card {
+                padding: 24px;
+            }
+            .ehr-card {
+                padding: 16px;
+            }
+            .clinical-input-container {
+                margin: 0 10px;
             }
         }
     </style>
 </head>
 
 <body style="display: none;">
+
+    <!-- Mobile Navigation Header -->
+    <div class="mobile-nav-header">
+        <button class="mobile-toggle-btn" id="mobileSidebarToggle" type="button" title="View History">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="mobile-header-title">AI Patient Clinic</div>
+        <button class="mobile-toggle-btn" id="mobileEhrToggle" type="button" title="View Patient File">
+            <i class="fa-solid fa-address-card"></i>
+        </button>
+    </div>
+
+    <!-- Mobile Drawer Overlay -->
+    <div class="mobile-drawer-overlay" id="drawerOverlay"></div>
 
     <!-- Glowing ambient backdrop blobs -->
     <div class="bg-blur-circle bg-blur-1"></div>
@@ -1216,6 +1396,9 @@
                     <h1>AI Patient Clinic</h1>
                     <span>Workspace</span>
                 </div>
+                <button class="mobile-drawer-close" id="closeSidebarBtn" type="button" title="Close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
 
             <button class="btn-new-simulation" id="newSimulationBtn" type="button">
@@ -1309,8 +1492,11 @@
         <!-- Column 3: EHR / Diagnostics Hub -->
         <aside class="diagnostics-hub">
             <div class="ehr-section">
-                <div class="section-title">
-                    <i class="fa-solid fa-address-card"></i> Patient File
+                <div class="section-title" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <span><i class="fa-solid fa-address-card"></i> Patient File</span>
+                    <button class="mobile-drawer-close" id="closeEhrBtn" type="button" title="Close">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
                 </div>
                 <div class="ehr-card" style="margin-top: 8px;">
                     <div class="patient-card">
@@ -1973,6 +2159,7 @@
                 
                 card.addEventListener('click', () => {
                     loadConversationHistory(conv.id, displayTitle);
+                    if (window.innerWidth <= 1024) closeAllDrawers();
                 });
 
                 historyList.appendChild(card);
@@ -2293,7 +2480,10 @@
         // Event Listeners
         sendBtn.addEventListener('click', sendMessage);
         resetBtn.addEventListener('click', resetChat);
-        newSimulationBtn.addEventListener('click', startNewSimulation);
+        newSimulationBtn.addEventListener('click', () => {
+            startNewSimulation();
+            if (window.innerWidth <= 1024) closeAllDrawers();
+        });
         logoutBtn.addEventListener('click', clinicianSignOut);
 
         document.getElementById('sidebarSearch').addEventListener('input', filterAndRenderHistory);
@@ -2305,6 +2495,40 @@
                 sendMessage();
             }
         });
+
+        // Mobile Navigation drawer handlers
+        const mobileSidebarToggle = document.getElementById('mobileSidebarToggle');
+        const mobileEhrToggle = document.getElementById('mobileEhrToggle');
+        const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+        const closeEhrBtn = document.getElementById('closeEhrBtn');
+        const drawerOverlay = document.getElementById('drawerOverlay');
+        
+        const caseSidebar = document.querySelector('.case-sidebar');
+        const diagnosticsHub = document.querySelector('.diagnostics-hub');
+        
+        function openSidebarDrawer() {
+            caseSidebar.classList.add('drawer-open');
+            diagnosticsHub.classList.remove('drawer-open');
+            drawerOverlay.classList.add('active');
+        }
+        
+        function openEhrDrawer() {
+            diagnosticsHub.classList.add('drawer-open');
+            caseSidebar.classList.remove('drawer-open');
+            drawerOverlay.classList.add('active');
+        }
+        
+        function closeAllDrawers() {
+            caseSidebar.classList.remove('drawer-open');
+            diagnosticsHub.classList.remove('drawer-open');
+            drawerOverlay.classList.remove('active');
+        }
+        
+        if (mobileSidebarToggle) mobileSidebarToggle.addEventListener('click', openSidebarDrawer);
+        if (mobileEhrToggle) mobileEhrToggle.addEventListener('click', openEhrDrawer);
+        if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeAllDrawers);
+        if (closeEhrBtn) closeEhrBtn.addEventListener('click', closeAllDrawers);
+        if (drawerOverlay) drawerOverlay.addEventListener('click', closeAllDrawers);
 
         // Bootstrap App
         restoreTheme();
