@@ -1279,6 +1279,14 @@
 
         /* Responsive */
         @media(max-width: 1024px) {
+            body {
+                display: block !important;
+                position: relative !important;
+                width: 100% !important;
+                height: 100vh !important;
+                height: 100dvh !important;
+                overflow: hidden !important;
+            }
             .mobile-nav-header {
                 display: flex;
             }
@@ -1288,6 +1296,7 @@
             .workspace-container {
                 grid-template-columns: 1fr !important;
                 height: calc(100vh - 60px) !important;
+                height: calc(100dvh - 60px) !important;
                 margin-top: 60px !important;
                 padding: 0 !important;
             }
@@ -1298,16 +1307,17 @@
                 left: -100%;
                 width: 290px;
                 height: 100vh;
+                height: 100dvh;
                 z-index: 1001;
                 transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                background: rgba(9, 9, 11, 0.96) !important;
-                backdrop-filter: blur(30px) !important;
-                -webkit-backdrop-filter: blur(30px) !important;
+                background: rgba(9, 9, 11, 0.7) !important;
+                backdrop-filter: blur(20px) !important;
+                -webkit-backdrop-filter: blur(20px) !important;
                 box-shadow: 10px 0 30px rgba(0, 0, 0, 0.6) !important;
                 border-right: 1px solid var(--glass-border) !important;
             }
             body.light-theme .case-sidebar {
-                background: rgba(255, 255, 255, 0.96) !important;
+                background: rgba(255, 255, 255, 0.7) !important;
             }
             .case-sidebar.drawer-open {
                 left: 0 !important;
@@ -1319,18 +1329,19 @@
                 right: -100%;
                 width: 320px;
                 height: 100vh;
+                height: 100dvh;
                 z-index: 1001;
                 transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                background: rgba(9, 9, 11, 0.96) !important;
-                backdrop-filter: blur(30px) !important;
-                -webkit-backdrop-filter: blur(30px) !important;
+                background: rgba(9, 9, 11, 0.7) !important;
+                backdrop-filter: blur(20px) !important;
+                -webkit-backdrop-filter: blur(20px) !important;
                 box-shadow: -10px 0 30px rgba(0, 0, 0, 0.6) !important;
                 border-left: 1px solid var(--glass-border) !important;
                 overflow-y: auto;
                 box-sizing: border-box;
             }
             body.light-theme .diagnostics-hub {
-                background: rgba(255, 255, 255, 0.96) !important;
+                background: rgba(255, 255, 255, 0.7) !important;
             }
             .diagnostics-hub.drawer-open {
                 right: 0 !important;
