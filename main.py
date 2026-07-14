@@ -8,6 +8,7 @@ from uuid import uuid4
 from fastapi import FastAPI, HTTPException, Header, Depends, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 import json
+import hashlib
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
@@ -187,6 +188,118 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory=BASE_DIR), name="static")
 
 initialize_client()
+
+CLINICAL_CASES = [
+    {
+        "disease": "Acute Appendicitis",
+        "profile": (
+            "Name: Zainab Bibi, Age: 24, Gender: Female, Occupation: Student.\n"
+            "Chief Complaint: Severe lower right abdominal pain that started around my navel 18 hours ago and migrated to the lower right side. It hurts when I move or cough.\n"
+            "Associated Symptoms: Loss of appetite, mild nausea, and a low-grade fever (99.5F). No diarrhea, no urinary issues. Pain is sharp and worsening.\n"
+            "Speaking Style: Speaks in a distressed, slow voice. Mixes in simple Roman Urdu sentences (e.g. 'Stomach key right side par bohat shadeed dard hai, move nahi kia ja raha').\n"
+            "Personality/Emotional State: Anxious, guarded, in noticeable physical discomfort."
+        )
+    },
+    {
+        "disease": "Acute Myocardial Infarction (Heart Attack)",
+        "profile": (
+            "Name: Muhammad Rafiq, Age: 58, Gender: Male, Occupation: Shopkeeper.\n"
+            "Chief Complaint: Heavy, crushing pressure in the middle of my chest for the last 45 minutes, feels like an elephant is sitting on my chest.\n"
+            "Associated Symptoms: Pain radiates to the left arm and jaw. Severe sweating, shortness of breath, and mild dizziness. No vomiting, no fever.\n"
+            "Speaking Style: Speaks in short, breathless sentences. Mixes in Roman Urdu (e.g. 'Seene par bohat bojh hai, baayein baazu mein khichao ho raha hai').\n"
+            "Personality/Emotional State: Extremely frightened, gasping for breath, sweating (diaphoretic)."
+        )
+    },
+    {
+        "disease": "Migraine Headache",
+        "profile": (
+            "Name: Ayesha Khan, Age: 29, Gender: Female, Occupation: Software Engineer.\n"
+            "Chief Complaint: Severe, throbbing headache on the left side of my head for the past 12 hours. It started after seeing bright flashing zig-zag patterns.\n"
+            "Associated Symptoms: Nausea, sensitivity to light (photophobia) and sound (phonophobia). Visual aura prior to headache. No fever, no neck stiffness.\n"
+            "Speaking Style: Speaks in a very soft, quiet, low-energy voice. Mixes in Roman Urdu (e.g. 'Sir mein bohat taiz dard hai, roshni aur shor se dard barhta hai').\n"
+            "Personality/Emotional State: Irritated, exhausted, prefers a dark room."
+        )
+    },
+    {
+        "disease": "Community-Acquired Pneumonia",
+        "profile": (
+            "Name: Bilal Ahmed, Age: 42, Gender: Male, Occupation: Construction Worker.\n"
+            "Chief Complaint: High fever, chills, and a deep cough producing thick, rusty-colored sputum for the last 3 days. Sharp pain in the right side of my chest when breathing in.\n"
+            "Associated Symptoms: Shortness of breath on mild exertion, fatigue, and muscle aches. No diarrhea, no weight loss.\n"
+            "Speaking Style: Speaks with a deep cough, clearing throat frequently. Mixes in Roman Urdu (e.g. 'Bohat taiz bukhaar hai aur khansi ke sath thook ka rang ajeeb hai').\n"
+            "Personality/Emotional State: Fatigued, weak, panting slightly between sentences."
+        )
+    },
+    {
+        "disease": "Type 2 Diabetes Mellitus",
+        "profile": (
+            "Name: Yasmin Riaz, Age: 52, Gender: Female, Occupation: Homemaker.\n"
+            "Chief Complaint: Extreme fatigue, dry mouth, and drinking excessive amounts of water for the past few weeks. I have to wake up 4-5 times at night to urinate.\n"
+            "Associated Symptoms: Mild blurred vision, constant hunger, and a small cut on my foot that is not healing. No fever, no abdominal pain.\n"
+            "Speaking Style: Speaks in a tired, mature tone. Mixes in Roman Urdu (e.g. 'Bohat jaldi thak jaati hoon, pyaas bohat lagti hai aur baar baar washroom jana parta hai').\n"
+            "Personality/Emotional State: Concerned but calm, slightly frustrated with constant fatigue."
+        )
+    },
+    {
+        "disease": "Iron Deficiency Anemia",
+        "profile": (
+            "Name: Sana Malik, Age: 31, Gender: Female, Occupation: School Teacher.\n"
+            "Chief Complaint: Progressive weakness, severe fatigue, and feeling short of breath when climbing stairs for the last 2 months.\n"
+            "Associated Symptoms: Dizziness when standing up, cold hands and feet, pale face. Occasional cravings for eating ice. No bleeding, no chest pain.\n"
+            "Speaking Style: Speaks in a weak, flat, low-pitched voice. Mixes in Roman Urdu (e.g. 'Har waqt thakawat rehti hai aur thora sa chalne se saans phoolti hai').\n"
+            "Personality/Emotional State: Lacks energy, looks pale, passive."
+        )
+    },
+    {
+        "disease": "Acute Urinary Tract Infection (UTI)",
+        "profile": (
+            "Name: Hina Saleem, Age: 26, Gender: Female, Occupation: Receptionist.\n"
+            "Chief Complaint: Severe burning pain when urinating and a constant urge to go to the toilet every 20-30 minutes for the past 2 days.\n"
+            "Associated Symptoms: Pain in the lower belly (pelvic area), cloudy and foul-smelling urine. No fever, no back/flank pain (indicates no pyelonephritis).\n"
+            "Speaking Style: Speaks in an embarrassed, polite tone. Mixes in Roman Urdu (e.g. 'Urine karte waqt bohat jalan hoti hai aur baar baar haajat hoti hai').\n"
+            "Personality/Emotional State: Uncomfortable, slightly embarrassed, desperate for relief."
+        )
+    },
+    {
+        "disease": "Gastroesophageal Reflux Disease (GERD)",
+        "profile": (
+            "Name: Kamran Shah, Age: 38, Gender: Male, Occupation: Banker.\n"
+            "Chief Complaint: Burning chest pain behind my breastbone (heartburn) that occurs mostly at night, especially after eating spicy meals.\n"
+            "Associated Symptoms: Sour, acidic taste in my mouth, chronic dry cough when lying down. Pain is relieved temporarily by drinking water. No difficulty swallowing (dysphagia).\n"
+            "Speaking Style: Speaks clearly, clear throat occasionally. Mixes in Roman Urdu (e.g. 'Seene mein jalan hoti hai jab bhi let-ta hoon, khana oopar aata hai').\n"
+            "Personality/Emotional State: Annoyed with persistent symptoms, but otherwise healthy and active."
+        )
+    },
+    {
+        "disease": "Bronchial Asthma Flare-up",
+        "profile": (
+            "Name: Zain Ali, Age: 19, Gender: Male, Occupation: College Student.\n"
+            "Chief Complaint: Chest tightness, wheezing, and difficulty breathing that started last night when it got cold.\n"
+            "Associated Symptoms: Dry cough, history of dust allergies and eczema. Using an inhaler helps slightly. No fever, no chest pain.\n"
+            "Speaking Style: Speaks with visible effort, audible wheezing sound. Mixes in Roman Urdu (e.g. 'Saans lene mein seeti ki awaaz aati hai, seena bandha hua lagta hai').\n"
+            "Personality/Emotional State: Anxious, struggling to speak long sentences."
+        )
+    },
+    {
+        "disease": "Chronic Kidney Disease",
+        "profile": (
+            "Name: Tariq Mahmood, Age: 65, Gender: Male, Occupation: Retired Clerk.\n"
+            "Chief Complaint: Swelling in both of my feet and ankles for the past month, along with puffy eyes in the morning.\n"
+            "Associated Symptoms: Decreased appetite, a metallic taste in my mouth, itchy skin, and mild nausea. History of long-standing hypertension.\n"
+            "Speaking Style: Speaks in a slow, elderly, weary tone. Mixes in Roman Urdu (e.g. 'Paaon par bohat soojan aa gayi hai, khana khane ka dil nahi karta').\n"
+            "Personality/Emotional State: Fatigued, resigned, worried about long-term health."
+        )
+    }
+]
+
+def get_clinical_case(conversation_id: str):
+    try:
+        hash_val = int(hashlib.md5(conversation_id.encode()).hexdigest(), 16)
+        case_idx = hash_val % len(CLINICAL_CASES)
+        return CLINICAL_CASES[case_idx]
+    except Exception:
+        return CLINICAL_CASES[0]
+
 SYSTEM_PROMPT = {
     "role": "system",
     "content": (
@@ -308,6 +421,8 @@ async def chat_with_llm(
         )
 
         for msg in result.data or []:
+            if msg["content"].startswith("__SUMMARY_JSON__"):
+                continue
             role = "assistant" if msg["sender"] == "ai" else "user"
 
             conversation_history.append(
@@ -334,12 +449,31 @@ async def chat_with_llm(
             else "gpt-4o-mini"
         )
 
+        # Select patient case deterministically based on conversation_id
+        selected_case = get_clinical_case(conversation_id)
+
+        # Dynamic System Prompt injection
+        dynamic_content = (
+            f"{SYSTEM_PROMPT['content']}\n\n"
+            "====================\n"
+            "YOUR CURRENT CLINICAL CASE PROFILE\n"
+            "====================\n"
+            f"You are simulating the following patient case for this conversation:\n"
+            f"{selected_case['profile']}\n"
+            f"Remember, the true underlying condition is: {selected_case['disease']}.\n"
+            "Do NOT reveal the disease or name of the disease to the student unless BOTH evaluation conditions are met."
+        )
+        dynamic_system_prompt = {
+            "role": "system",
+            "content": dynamic_content
+        }
+
         async def generate():
             full_reply = ""
 
             stream = client.chat.completions.create(
                 model=model_name,
-                messages=[SYSTEM_PROMPT] + conversation_history,
+                messages=[dynamic_system_prompt] + conversation_history,
                 temperature=0.2,
                 max_tokens=150,
                 top_p=0.2,
@@ -501,7 +635,10 @@ async def save_message(payload: SaveMessageRequest, access_token: str = Depends(
             .order("created_at", desc=False)
             .execute()
         )
-        chat_messages = [msg for msg in all_messages_res.data or [] if msg["sender"] in ("user", "ai")]
+        chat_messages = [
+            msg for msg in all_messages_res.data or [] 
+            if msg["sender"] in ("user", "ai") and not msg["content"].startswith("__SUMMARY_JSON__")
+        ]
 
         try:
             # Generate new metadata based on full conversation history
