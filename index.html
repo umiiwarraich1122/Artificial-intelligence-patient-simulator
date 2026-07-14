@@ -78,6 +78,15 @@
             </div>
 
             <div class="sidebar-footer">
+                <div class="user-profile-badge" id="userProfileBadge" style="display: none; align-items: center; gap: 10px; padding: 10px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--glass-border); border-radius: var(--radius-md); margin-bottom: 12px;">
+                    <div class="user-avatar" style="width: 32px; height: 32px; border-radius: 50%; background: var(--gradient-pink); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">
+                        <i class="fa-solid fa-user-md"></i>
+                    </div>
+                    <div class="user-info" style="display: flex; flex-direction: column; min-width: 0; width: 100%;">
+                        <span id="userNameText" style="font-size: 0.85rem; font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Dr. Clinician</span>
+                        <span id="userRoleText" style="font-size: 0.7rem; color: var(--text-muted); text-transform: capitalize;">Medical Student</span>
+                    </div>
+                </div>
                 <button class="btn-action-outline" id="themeToggleBtn" type="button" onclick="toggleTheme()">
                     <i class="fa-solid fa-sun" id="themeIcon"></i> Theme Mode
                 </button>

@@ -196,9 +196,15 @@ CLINICAL_CASES = [
             "Name: Zainab Bibi, Age: 24, Gender: Female, Occupation: Student.\n"
             "Chief Complaint: Severe lower right abdominal pain that started around my navel 18 hours ago and migrated to the lower right side. It hurts when I move or cough.\n"
             "Associated Symptoms: Loss of appetite, mild nausea, and a low-grade fever (99.5F). No diarrhea, no urinary issues. Pain is sharp and worsening.\n"
-            "Speaking Style: Speaks in a distressed, slow voice. Mixes in simple Roman Urdu sentences (e.g. 'Stomach key right side par bohat shadeed dard hai, move nahi kia ja raha').\n"
+            "Speaking Style: Speaks in a distressed, slow voice entirely in English.\n"
             "Personality/Emotional State: Anxious, guarded, in noticeable physical discomfort."
-        )
+        ),
+        "vitals": {
+            "heart_rate": 88,
+            "blood_pressure": "118/76",
+            "temperature": 99.8,
+            "resp_rate": 18
+        }
     },
     {
         "disease": "Acute Myocardial Infarction (Heart Attack)",
@@ -206,9 +212,15 @@ CLINICAL_CASES = [
             "Name: Choudry Malik lonstin Gondel, Age: 58, Gender: Male, Occupation: Shopkeeper.\n"
             "Chief Complaint: Heavy, crushing pressure in the middle of my chest for the last 45 minutes, feels like an elephant is sitting on my chest.\n"
             "Associated Symptoms: Pain radiates to the left arm and jaw. Severe sweating, shortness of breath, and mild dizziness. No vomiting, no fever.\n"
-            "Speaking Style: Speaks in short, breathless sentences. Mixes in Roman Urdu (e.g. 'Seene par bohat bojh hai, baayein baazu mein khichao ho raha hai').\n"
+            "Speaking Style: Speaks in short, breathless sentences entirely in English.\n"
             "Personality/Emotional State: Extremely frightened, gasping for breath, sweating (diaphoretic)."
-        )
+        ),
+        "vitals": {
+            "heart_rate": 104,
+            "blood_pressure": "145/95",
+            "temperature": 98.4,
+            "resp_rate": 22
+        }
     },
     {
         "disease": "Migraine Headache",
@@ -216,9 +228,15 @@ CLINICAL_CASES = [
             "Name: Ayesha Khan, Age: 29, Gender: Female, Occupation: Software Engineer.\n"
             "Chief Complaint: Severe, throbbing headache on the left side of my head for the past 12 hours. It started after seeing bright flashing zig-zag patterns.\n"
             "Associated Symptoms: Nausea, sensitivity to light (photophobia) and sound (phonophobia). Visual aura prior to headache. No fever, no neck stiffness.\n"
-            "Speaking Style: Speaks in a very soft, quiet, low-energy voice. Mixes in Roman Urdu (e.g. 'Sir mein bohat taiz dard hai, roshni aur shor se dard barhta hai').\n"
+            "Speaking Style: Speaks in a very soft, quiet, low-energy voice entirely in English.\n"
             "Personality/Emotional State: Irritated, exhausted, prefers a dark room."
-        )
+        ),
+        "vitals": {
+            "heart_rate": 76,
+            "blood_pressure": "122/80",
+            "temperature": 98.6,
+            "resp_rate": 14
+        }
     },
     {
         "disease": "Community-Acquired Pneumonia",
@@ -226,9 +244,15 @@ CLINICAL_CASES = [
             "Name: Bilal Ahmed, Age: 42, Gender: Male, Occupation: Construction Worker.\n"
             "Chief Complaint: High fever, chills, and a deep cough producing thick, rusty-colored sputum for the last 3 days. Sharp pain in the right side of my chest when breathing in.\n"
             "Associated Symptoms: Shortness of breath on mild exertion, fatigue, and muscle aches. No diarrhea, no weight loss.\n"
-            "Speaking Style: Speaks with a deep cough, clearing throat frequently. Mixes in Roman Urdu (e.g. 'Bohat taiz bukhaar hai aur khansi ke sath thook ka rang ajeeb hai').\n"
+            "Speaking Style: Speaks with a deep cough, clearing throat frequently entirely in English.\n"
             "Personality/Emotional State: Fatigued, weak, panting slightly between sentences."
-        )
+        ),
+        "vitals": {
+            "heart_rate": 98,
+            "blood_pressure": "110/70",
+            "temperature": 102.1,
+            "resp_rate": 24
+        }
     },
     {
         "disease": "Type 2 Diabetes Mellitus",
@@ -236,9 +260,15 @@ CLINICAL_CASES = [
             "Name: Yasmin Riaz, Age: 52, Gender: Female, Occupation: Homemaker.\n"
             "Chief Complaint: Extreme fatigue, dry mouth, and drinking excessive amounts of water for the past few weeks. I have to wake up 4-5 times at night to urinate.\n"
             "Associated Symptoms: Mild blurred vision, constant hunger, and a small cut on my foot that is not healing. No fever, no abdominal pain.\n"
-            "Speaking Style: Speaks in a tired, mature tone. Mixes in Roman Urdu (e.g. 'Bohat jaldi thak jaati hoon, pyaas bohat lagti hai aur baar baar washroom jana parta hai').\n"
+            "Speaking Style: Speaks in a tired, mature tone entirely in English.\n"
             "Personality/Emotional State: Concerned but calm, slightly frustrated with constant fatigue."
-        )
+        ),
+        "vitals": {
+            "heart_rate": 82,
+            "blood_pressure": "135/85",
+            "temperature": 98.5,
+            "resp_rate": 16
+        }
     },
     {
         "disease": "Iron Deficiency Anemia",
@@ -246,9 +276,15 @@ CLINICAL_CASES = [
             "Name: Sana Malik, Age: 31, Gender: Female, Occupation: School Teacher.\n"
             "Chief Complaint: Progressive weakness, severe fatigue, and feeling short of breath when climbing stairs for the last 2 months.\n"
             "Associated Symptoms: Dizziness when standing up, cold hands and feet, pale face. Occasional cravings for eating ice. No bleeding, no chest pain.\n"
-            "Speaking Style: Speaks in a weak, flat, low-pitched voice. Mixes in Roman Urdu (e.g. 'Har waqt thakawat rehti hai aur thora sa chalne se saans phoolti hai').\n"
+            "Speaking Style: Speaks in a weak, flat, low-pitched voice entirely in English.\n"
             "Personality/Emotional State: Lacks energy, looks pale, passive."
-        )
+        ),
+        "vitals": {
+            "heart_rate": 92,
+            "blood_pressure": "105/65",
+            "temperature": 97.9,
+            "resp_rate": 18
+        }
     },
     {
         "disease": "Acute Urinary Tract Infection (UTI)",
@@ -256,9 +292,15 @@ CLINICAL_CASES = [
             "Name: Hina Saleem, Age: 26, Gender: Female, Occupation: Receptionist.\n"
             "Chief Complaint: Severe burning pain when urinating and a constant urge to go to the toilet every 20-30 minutes for the past 2 days.\n"
             "Associated Symptoms: Pain in the lower belly (pelvic area), cloudy and foul-smelling urine. No fever, no back/flank pain (indicates no pyelonephritis).\n"
-            "Speaking Style: Speaks in an embarrassed, polite tone. Mixes in Roman Urdu (e.g. 'Urine karte waqt bohat jalan hoti hai aur baar baar haajat hoti hai').\n"
+            "Speaking Style: Speaks in an embarrassed, polite tone entirely in English.\n"
             "Personality/Emotional State: Uncomfortable, slightly embarrassed, desperate for relief."
-        )
+        ),
+        "vitals": {
+            "heart_rate": 85,
+            "blood_pressure": "115/72",
+            "temperature": 100.9,
+            "resp_rate": 16
+        }
     },
     {
         "disease": "Gastroesophageal Reflux Disease (GERD)",
@@ -266,9 +308,15 @@ CLINICAL_CASES = [
             "Name: Kamran Shah, Age: 38, Gender: Male, Occupation: Banker.\n"
             "Chief Complaint: Burning chest pain behind my breastbone (heartburn) that occurs mostly at night, especially after eating spicy meals.\n"
             "Associated Symptoms: Sour, acidic taste in my mouth, chronic dry cough when lying down. Pain is relieved temporarily by drinking water. No difficulty swallowing (dysphagia).\n"
-            "Speaking Style: Speaks clearly, clear throat occasionally. Mixes in Roman Urdu (e.g. 'Seene mein jalan hoti hai jab bhi let-ta hoon, khana oopar aata hai').\n"
+            "Speaking Style: Speaks clearly, clear throat occasionally entirely in English.\n"
             "Personality/Emotional State: Annoyed with persistent symptoms, but otherwise healthy and active."
-        )
+        ),
+        "vitals": {
+            "heart_rate": 72,
+            "blood_pressure": "120/80",
+            "temperature": 98.6,
+            "resp_rate": 12
+        }
     },
     {
         "disease": "Bronchial Asthma Flare-up",
@@ -276,9 +324,15 @@ CLINICAL_CASES = [
             "Name: Zain Ali, Age: 19, Gender: Male, Occupation: College Student.\n"
             "Chief Complaint: Chest tightness, wheezing, and difficulty breathing that started last night when it got cold.\n"
             "Associated Symptoms: Dry cough, history of dust allergies and eczema. Using an inhaler helps slightly. No fever, no chest pain.\n"
-            "Speaking Style: Speaks with visible effort, audible wheezing sound. Mixes in Roman Urdu (e.g. 'Saans lene mein seeti ki awaaz aati hai, seena bandha hua lagta hai').\n"
+            "Speaking Style: Speaks with visible effort, audible wheezing sound entirely in English.\n"
             "Personality/Emotional State: Anxious, struggling to speak long sentences."
-        )
+        ),
+        "vitals": {
+            "heart_rate": 105,
+            "blood_pressure": "130/85",
+            "temperature": 98.7,
+            "resp_rate": 26
+        }
     },
     {
         "disease": "Chronic Kidney Disease",
@@ -286,9 +340,15 @@ CLINICAL_CASES = [
             "Name: Tariq Mahmood, Age: 65, Gender: Male, Occupation: Retired Clerk.\n"
             "Chief Complaint: Swelling in both of my feet and ankles for the past month, along with puffy eyes in the morning.\n"
             "Associated Symptoms: Decreased appetite, a metallic taste in my mouth, itchy skin, and mild nausea. History of long-standing hypertension.\n"
-            "Speaking Style: Speaks in a slow, elderly, weary tone. Mixes in Roman Urdu (e.g. 'Paaon par bohat soojan aa gayi hai, khana khane ka dil nahi karta').\n"
+            "Speaking Style: Speaks in a slow, elderly, weary tone entirely in English.\n"
             "Personality/Emotional State: Fatigued, resigned, worried about long-term health."
-        )
+        ),
+        "vitals": {
+            "heart_rate": 78,
+            "blood_pressure": "155/98",
+            "temperature": 98.2,
+            "resp_rate": 16
+        }
     }
 ]
 
@@ -339,10 +399,10 @@ SYSTEM_PROMPT = {
         "- When greeted, respond naturally as a patient with only your chief complaint.\n"
         "- Do NOT reveal every symptom immediately.\n"
         "- Reveal information gradually only when asked appropriate history-taking questions.\n"
-        "- Speak naturally using simple English mixed with Roman Urdu when appropriate.\n"
-        "- Match the student's language.\n"
-        "- If asked medical definitions or to diagnose yourself, respond like a normal patient:\n"
-        "  'Mujhe nahi pata doctor saab, aap check karke batayein.'\n\n"
+        "- Speak naturally. You MUST reply entirely in English under all circumstances.\n"
+        "- Never reply or write in Roman Urdu, Hindi, or Urdu, even if the student talks to you in Roman Urdu. Speak only in English.\n"
+        "- If asked medical definitions or to diagnose yourself, respond in English like a normal patient:\n"
+        "  'I don't know doctor, please check and tell me.'\n\n"
 
         "====================\n"
         "EVALUATION PHASE\n"
@@ -451,6 +511,7 @@ async def chat_with_llm(
 
         # Select patient case deterministically based on conversation_id
         selected_case = get_clinical_case(conversation_id)
+        vitals = selected_case["vitals"]
 
         # Dynamic System Prompt injection
         dynamic_content = (
@@ -461,6 +522,8 @@ async def chat_with_llm(
             f"You are simulating the following patient case for this conversation:\n"
             f"{selected_case['profile']}\n"
             f"Remember, the true underlying condition is: {selected_case['disease']}.\n"
+            f"Your vitals are: Heart Rate: {vitals['heart_rate']} BPM, Blood Pressure: {vitals['blood_pressure']} mmHg, Temperature: {vitals['temperature']} F, Respiratory Rate: {vitals['resp_rate']} per minute.\n"
+            "If the student/doctor asks you about your vitals (e.g. blood pressure, pulse rate, temperature), you MUST state these values exactly. Respond naturally as a patient in English: 'My blood pressure was 118/76' or 'My temperature is 99.8 degrees'.\n"
             "Do NOT reveal the disease or name of the disease to the student unless BOTH evaluation conditions are met."
         )
         dynamic_system_prompt = {
@@ -911,9 +974,47 @@ async def delete_conversation(
     )
 
     return {"message": "Conversation deleted"}
+
+@app.get("/chat/vitals/{conversation_id}")
+async def get_conversation_vitals(conversation_id: str):
+    try:
+        selected_case = get_clinical_case(conversation_id)
+        return selected_case["vitals"]
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
 @app.get("/")
 def home():
     return FileResponse("signup.html")
+
+@app.get("/auth/check-provider")
+async def check_email_provider(email: str):
+    try:
+        url = os.getenv("SUPABASE_URL")
+        key = os.getenv("SUPABASE_KEY")
+        if not url or not key:
+            return {"registered": False}
+        
+        admin_client = create_client(url, key)
+        users_res = admin_client.auth.admin.list_users()
+        
+        target_user = None
+        for u in users_res:
+            if u.email and u.email.strip().lower() == email.strip().lower():
+                target_user = u
+                break
+                
+        if target_user:
+            app_metadata = target_user.app_metadata or {}
+            providers = app_metadata.get("providers", [])
+            if "google" in providers and "email" not in providers:
+                return {"registered": True, "provider": "google"}
+            return {"registered": True, "provider": "email" if "email" in providers else "other"}
+            
+        return {"registered": False}
+    except Exception as exc:
+        print(f"Error checking provider: {exc}")
+        return {"registered": False}
 
 @app.get("/signup.html")
 def signup_page():

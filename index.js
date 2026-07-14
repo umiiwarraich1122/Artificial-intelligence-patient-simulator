@@ -83,6 +83,24 @@ async function initializeAuth() {
     }
     accessToken = data.session.access_token;
     
+    // Display user profile card details
+    const user = data.session.user;
+    if (user) {
+        const metadata = user.user_metadata || {};
+        const fullName = metadata.full_name || user.email || "Clinician";
+        const role = metadata.role || "Medical Student";
+        
+        const userNameText = document.getElementById("userNameText");
+        const userRoleText = document.getElementById("userRoleText");
+        const userProfileBadge = document.getElementById("userProfileBadge");
+        
+        if (userNameText) userNameText.textContent = fullName.startsWith("Dr.") ? fullName : `Dr. ${fullName}`;
+        if (userRoleText) userRoleText.textContent = role;
+        if (userProfileBadge) {
+            userProfileBadge.style.display = "flex";
+        }
+    }
+    
     // Show body after authentication succeeds
     document.body.style.display = "flex";
     
@@ -155,6 +173,25 @@ function randomizeVitals() {
     document.getElementById('vitalResp').textContent = `${respVal} / min`;
 }
 
+async function loadVitals(conversationId) {
+    if (!conversationId) return;
+    try {
+        const response = await fetch(`${BASE_BACKEND}/chat/vitals/${conversationId}`);
+        if (response.ok) {
+            const vitals = await response.json();
+            document.getElementById('vitalHeart').textContent = `${vitals.heart_rate} BPM`;
+            document.getElementById('vitalBP').textContent = `${vitals.blood_pressure} mmHg`;
+            document.getElementById('vitalTemp').textContent = `${vitals.temperature} °F`;
+            document.getElementById('vitalResp').textContent = `${vitals.resp_rate} / min`;
+        } else {
+            randomizeVitals();
+        }
+    } catch (err) {
+        console.error("Vitals load error:", err);
+        randomizeVitals();
+    }
+}
+
 function clearVitals() {
     document.getElementById('vitalHeart').textContent = `-- BPM`;
     document.getElementById('vitalBP').textContent = `-- mmHg`;
@@ -219,7 +256,7 @@ async function loadConversationHistory(conversationId, summaryTitle = 'Active Ca
     sendBtn.disabled = false;
     chatInput.placeholder = "Interview the patient...";
     
-    randomizeVitals();
+    loadVitals(conversationId);
 
     // Set active class in sidebar
     document.querySelectorAll('.history-card').forEach(card => {
@@ -802,7 +839,7 @@ function startNewSimulation() {
     chatInput.placeholder = "Interview the patient...";
     chatInput.focus();
     
-    randomizeVitals();
+    loadVitals(currentConversationId);
     
     const welcome = document.getElementById('welcomeDashboard');
     if (welcome) welcome.remove();

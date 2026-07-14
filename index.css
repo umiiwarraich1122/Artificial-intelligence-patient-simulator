@@ -1358,3 +1358,7 @@ body.light-theme .mobile-toggle-btn:hover {
         margin: 0 10px;
     }
 }
+
+body.light-theme .user-profile-badge {
+    background: rgba(0, 0, 0, 0.03) !important;
+}

@@ -1,5 +1,13 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
+const getBackendBase = () => {
+    if (window.location.port === "5500") {
+        return "http://127.0.0.1:8000";
+    }
+    return window.location.origin;
+};
+const BASE_BACKEND = getBackendBase();
+
 const supabase = createClient(
     "https://lwpblqvieqvfkvrbvtwi.supabase.co",
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3cGJscXZpZXF2Zmt2cmJ2dHdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2NTQwMDUsImV4cCI6MjA5OTIzMDAwNX0.gTgjavi7n_LuP7bFvDDMoOcwCiYNReAET9IOZMc_8jg"
@@ -123,7 +131,22 @@ async function handleFormSubmit(e) {
         setLoadingState(false);
 
         if (error) {
-            showAlert(error.message);
+            try {
+                const checkRes = await fetch(`${BASE_BACKEND}/auth/check-provider?email=${encodeURIComponent(email)}`);
+                if (checkRes.ok) {
+                    const checkData = await checkRes.json();
+                    if (checkData.registered && checkData.provider === "google") {
+                        showAlert("This email is already registered through Google. Please use the Google sign-in button.");
+                    } else {
+                        showAlert(error.message);
+                    }
+                } else {
+                    showAlert(error.message);
+                }
+            } catch (e) {
+                console.error(e);
+                showAlert(error.message);
+            }
         } else {
             showAlert("Account created! Please check your email for confirmation or sign in.", false);
             toggleAuthMode();
@@ -137,7 +160,22 @@ async function handleFormSubmit(e) {
         setLoadingState(false);
 
         if (error) {
-            showAlert(error.message);
+            try {
+                const checkRes = await fetch(`${BASE_BACKEND}/auth/check-provider?email=${encodeURIComponent(email)}`);
+                if (checkRes.ok) {
+                    const checkData = await checkRes.json();
+                    if (checkData.registered && checkData.provider === "google") {
+                        showAlert("This email is registered through Google. Please use the Google sign-in button.");
+                    } else {
+                        showAlert(error.message);
+                    }
+                } else {
+                    showAlert(error.message);
+                }
+            } catch (e) {
+                console.error(e);
+                showAlert(error.message);
+            }
         } else if (data.session) {
             // ⚠️ FIX: Delay redirection by 150ms to ensure localStorage completes writes
             setTimeout(() => {
