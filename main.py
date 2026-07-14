@@ -203,7 +203,7 @@ CLINICAL_CASES = [
     {
         "disease": "Acute Myocardial Infarction (Heart Attack)",
         "profile": (
-            "Name: Muhammad Rafiq, Age: 58, Gender: Male, Occupation: Shopkeeper.\n"
+            "Name: Choudry Malik lonstin Gondel, Age: 58, Gender: Male, Occupation: Shopkeeper.\n"
             "Chief Complaint: Heavy, crushing pressure in the middle of my chest for the last 45 minutes, feels like an elephant is sitting on my chest.\n"
             "Associated Symptoms: Pain radiates to the left arm and jaw. Severe sweating, shortness of breath, and mild dizziness. No vomiting, no fever.\n"
             "Speaking Style: Speaks in short, breathless sentences. Mixes in Roman Urdu (e.g. 'Seene par bohat bojh hai, baayein baazu mein khichao ho raha hai').\n"
