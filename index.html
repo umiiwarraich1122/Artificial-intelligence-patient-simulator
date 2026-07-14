@@ -50,7 +50,7 @@
             </div>
 
             <button class="btn-new-simulation" id="newSimulationBtn" type="button">
-                <i class="fa-solid fa-plus"></i> New Case Session
+                <i class="fa-solid fa-plus"></i> New Patient
             </button>
 
             <div class="section-title">
@@ -142,6 +142,9 @@
                 <div class="clinical-input-container">
                     <input type="text" class="clinical-input" id="chatInput"
                         placeholder="Interview the patient..." disabled>
+                    <button id="downloadReportBtn" class="btn-send-inquiry" title="Download PDF Report" type="button" style="display: none; background: linear-gradient(135deg, #a855f7, #e91eae); margin-right: 8px;">
+                        <i class="fa-solid fa-file-pdf"></i>
+                    </button>
                     <button class="btn-send-inquiry" id="sendBtn" title="Send Inquiry" type="button" disabled>
                         <i class="fa-solid fa-paper-plane"></i>
                     </button>

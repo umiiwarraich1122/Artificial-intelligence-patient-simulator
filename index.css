@@ -276,6 +276,116 @@ body.light-theme .rename-input {
     border-color: var(--primary);
 }
 
+/* Patient Accordion Styles */
+.patient-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 12px;
+}
+
+.patient-header {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    user-select: none;
+}
+
+body.light-theme .patient-header {
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+.patient-header:hover {
+    border-color: var(--primary);
+    background-color: rgba(233, 30, 174, 0.05);
+}
+
+.patient-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--text-main);
+}
+
+.patient-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.patient-header-actions button {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.patient-header-actions button:hover {
+    color: var(--primary);
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.patient-header-actions button.delete-patient-btn:hover {
+    color: #ef4444;
+}
+
+.patient-chats {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-left: 14px;
+    border-left: 1px dashed rgba(255, 255, 255, 0.15);
+    margin-top: 4px;
+}
+
+body.light-theme .patient-chats {
+    border-left: 1px dashed rgba(0, 0, 0, 0.1);
+}
+
+.patient-chats.collapsed {
+    display: none;
+}
+
+.nested-chat-card {
+    background-color: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    position: relative;
+}
+
+body.light-theme .nested-chat-card {
+    background-color: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.nested-chat-card:hover {
+    border-color: var(--primary);
+    background-color: rgba(233, 30, 174, 0.04);
+}
+
+.nested-chat-card.active {
+    border: 1.5px solid var(--primary);
+    background-color: rgba(233, 30, 174, 0.06);
+}
+
 .history-card {
     background-color: rgba(255, 255, 255, 0.04);
     border: 1px solid var(--glass-border);

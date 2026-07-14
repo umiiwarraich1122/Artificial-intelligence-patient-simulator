@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 class ChatRequest(BaseModel):
     message: str
     conversation_id: Optional[str] = None
+    patient_id: Optional[str] = None
 
 
 class ChatResponse(BaseModel):
@@ -29,6 +30,8 @@ class ConversationItem(BaseModel):
     message_count: Optional[int] = 0
     last_updated: Optional[str] = None
     duration_mins: Optional[int] = 0
+    patient_id: Optional[str] = None
+    is_patient_profile: Optional[bool] = False
 
 
 class UpdateSummaryRequest(BaseModel):
@@ -36,6 +39,7 @@ class UpdateSummaryRequest(BaseModel):
     custom_title: Optional[str] = None
     pinned: Optional[bool] = None
     status: Optional[str] = None
+    patient_id: Optional[str] = None
 
 
 class ConversationsResponse(BaseModel):
@@ -50,3 +54,7 @@ class MessageItem(BaseModel):
 
 class HistoryResponse(BaseModel):
     messages: List[MessageItem]
+
+
+class GenerateReportRequest(BaseModel):
+    conversation_id: str
