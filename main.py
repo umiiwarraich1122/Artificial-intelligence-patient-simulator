@@ -931,6 +931,22 @@ def chat_page():
 def index_page():
     return FileResponse("index.html")
 
+@app.get("/index.css")
+def get_index_css():
+    return FileResponse("index.css")
+
+@app.get("/index.js")
+def get_index_js():
+    return FileResponse("index.js", media_type="application/javascript")
+
+@app.get("/signup.css")
+def get_signup_css():
+    return FileResponse("signup.css")
+
+@app.get("/signup.js")
+def get_signup_js():
+    return FileResponse("signup.js", media_type="application/javascript")
+
 @app.get("/auth/callback")
 async def auth_callback(request: Request):
     return FileResponse(BASE_DIR / "signup.html")
