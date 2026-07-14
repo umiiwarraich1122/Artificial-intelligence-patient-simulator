@@ -332,35 +332,42 @@ let allPatients = [];
 let activePatientId = null;
 let activePatientName = null;
 
-// Load side history bar — ONE batched request instead of N+1
+// Load side history bar listing all previous sessions with case summaries
 async function loadConversations() {
     if (!accessToken) return;
     try {
-        const response = await fetch(`${BASE_BACKEND}/patients-full`, {
+        const response = await fetch(`${BASE_BACKEND}/patients`, {
             headers: { 'Authorization': `Bearer ${accessToken}` }
         });
         const data = await response.json();
-        allPatients = (response.ok && data.patients) ? data.patients : [];
+        
+        if (response.ok && data.patients) {
+            allPatients = data.patients;
+            for (const p of allPatients) {
+                try {
+                    const cRes = await fetch(`${BASE_BACKEND}/patients/${p.patient_id}/conversations`, {
+                        headers: { 'Authorization': `Bearer ${accessToken}` }
+                    });
+                    const cData = await cRes.json();
+                    if (cRes.ok && cData.conversations) {
+                        p.chats = cData.conversations;
+                    } else {
+                        p.chats = [];
+                    }
+                } catch (err) {
+                    console.error("Error fetching conversations for patient", p.patient_id, err);
+                    p.chats = [];
+                }
+            }
+        } else {
+            allPatients = [];
+        }
         filterAndRenderHistory();
     } catch (error) {
         console.error('Could not load conversations:', error);
         const he = document.getElementById('historyEmpty');
         if (he) { he.textContent = 'Error connecting to medical database.'; he.style.display = 'block'; }
     }
-}
-
-// Lightweight post-message sidebar update — only refreshes the active chat card's title
-// without reloading the entire sidebar tree
-function refreshActiveChatCard(newTitle, newSummary) {
-    const card = document.querySelector(`.nested-chat-card[data-id="${currentConversationId}"]`);
-    if (!card) return;
-    const titleEl = card.querySelector('.history-title');
-    const summaryEl = card.querySelector('.history-summary');
-    if (titleEl && newTitle) titleEl.innerHTML = `<i class="fa-solid fa-stethoscope"></i> ${newTitle}`;
-    if (summaryEl && newSummary) summaryEl.textContent = newSummary;
-    // Move card to top inside its chats container
-    const container = card.parentElement;
-    if (container && container.firstChild !== card) container.prepend(card);
 }
 
 // Filters, sorts, and renders the patient-chat history dynamically
