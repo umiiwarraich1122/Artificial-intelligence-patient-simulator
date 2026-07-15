@@ -1472,3 +1472,12 @@ body.light-theme .mobile-toggle-btn:hover {
 body.light-theme .user-profile-badge {
     background: rgba(0, 0, 0, 0.03) !important;
 }
+
+/* React mobile sidebar open class */
+.case-sidebar.mobile-open { left: 0 !important; }
+.active-patient .patient-header { border-color: var(--primary); }
+.delete-confirm-container { display: flex; flex-direction: column; gap: 8px; width: 100%; animation: fadeIn 0.2s ease; }
+.delete-confirm-title { font-size: 0.8rem; font-weight: 600; color: #ef4444; display: flex; align-items: center; gap: 6px; }
+.delete-confirm-btns { display: flex; gap: 10px; justify-content: flex-end; }
+.confirm-yes-btn { background: #ef4444; border: none; color: white; font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 6px; cursor: pointer; }
+.confirm-no-btn { background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border); color: var(--text-main); font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 6px; cursor: pointer; }
